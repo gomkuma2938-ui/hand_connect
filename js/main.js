@@ -4,27 +4,26 @@ import { CommentsModule } from './comments.js';
 
 const app = {
   async init() {
-    // 1. 갤러리 로딩
-    try {
-      GalleryModule.init('gallery-container', 76);
-    } catch (e) {
-      console.error("갤러리 초기화 실패:", e);
-    }
-
-    // 2. 모달 기능 활성화
+    // 1. 모달 먼저 초기화
     try {
       ModalModule.init();
       window.ModalModule = ModalModule;
     } catch (e) {
       console.error("모달 초기화 실패:", e);
     }
-
+    // 2. 갤러리 로딩 (setImageList가 여기서 호출됨)
+    try {
+      GalleryModule.init('gallery-container', 76);
+    } catch (e) {
+      console.error("갤러리 초기화 실패:", e);
+    }
     // 3. 댓글 리스트 로드
     try {
       await CommentsModule.init('comment-list');
     } catch (e) {
       console.error("댓글 로딩 실패:", e);
     }
+  },
   },
   
   async handleCommentSubmit() {
