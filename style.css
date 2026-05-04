@@ -1,0 +1,32 @@
+:root {
+  --gap: 2px; /* 인스타처럼 타이트하게 */
+}
+
+body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
+
+/* 이미지 그리드 */
+#gallery-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+.grid-item { position: relative; aspect-ratio: 1 / 1; overflow: hidden; }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 2x2 변칙 레이아웃 */
+.grid-item.big {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* 모달 및 닫기 버튼 */
+.modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9); z-index: 1000;
+}
+.close-btn {
+  position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer;
+}
