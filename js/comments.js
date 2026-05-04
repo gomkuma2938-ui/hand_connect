@@ -25,21 +25,15 @@ export const CommentsModule = {
       }
 
       // 화면에 그리기
-      this.listContainer.innerHTML = comments.map(c => {
-        // 날짜 가공 (Mon May 04... -> 2026. 5. 4.)
-        const dateObj = new Date(c.id);
-        const dateStr = isNaN(dateObj) ? c.id : dateObj.toLocaleDateString();
-
-        return `
-          <div class="comment-item" style="border-bottom:1px solid #eee; padding:10px 0;">
-            <div class="comment-content" style="margin-bottom:5px;">${c.content}</div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.8rem; color:#999;">${dateStr}</span>
-              <button onclick="deleteComment('${c.id}')" style="font-size:0.7rem; cursor:pointer;">삭제</button>
-            </div>
-          </div>
-        `;
-      }).join('');
+    this.listContainer.innerHTML = comments.map(c => `
+      <div class="comment-item">
+        <div class="comment-content">${c.content}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <span style="font-size:0.75rem; color:#999;">${c.id}</span>
+          <button class="del-btn" onclick="deleteComment('${c.id}')">삭제</button>
+        </div>
+      </div>
+    `).join('');
 
       // 페이지네이션 실행
       this.renderPagination(result.total, page, result.pageSize);
