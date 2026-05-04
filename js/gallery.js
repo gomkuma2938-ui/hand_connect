@@ -17,14 +17,11 @@ export const GalleryModule = {
         }
       }
     }
-
-    // 실제로 화면에 보이는 이미지만 추려서 목록 만들기
     const visibleImages = [];
-
     container.innerHTML = images.map((num, idx) => {
       if (usedSpaces.has(idx) && !bigIndices.includes(idx)) return '';
       const isBig = bigIndices.includes(idx);
-      visibleImages.push(`img/${num}.jpg`); // 보이는 것만 추가
+      visibleImages.push(`img/${num}.jpg`);
       return `
         <div class="grid-item ${isBig ? 'big' : ''}">
           <img src="img/${num}.jpg" 
@@ -33,8 +30,7 @@ export const GalleryModule = {
         </div>
       `;
     }).join('');
-
     window.openModal = (src) => ModalModule.open(src);
-    ModalModule.setImageList(visibleImages); // 보이는 것만 전달
+    ModalModule.setImageList(visibleImages);
   }
 };
