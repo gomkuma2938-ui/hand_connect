@@ -127,27 +127,30 @@ export const CommentsModule = {
     document.getElementById(`action-area-${id}`).style.display = 'none';
   },
 
-  async submitAction(id, action) {
-    const password = document.getElementById(`action-pw-${id}`).value.trim();
-    const content = action === 'update' ? document.getElementById(`edit-input-${id}`).value.trim() : "";
-    
-    if (action === 'update' && !content) return alert("내용을 입력하세요.");
-    if (!password) return alert("비밀번호를 입력하세요.");
+async submitAction(id, action) {
+  const password = document.getElementById(`action-pw-${id}`).value.trim();
+  // 변수명을 content로 통일하여 서버와 맞춤
+  const content = action === 'update' ? document.getElementById(`edit-input-${id}`).value.trim() : "";
+  
+  if (!password) return alert("비밀번호를 입력하세요.");
 
+  try {
     const res = await fetch(this.config.apiUrl, {
       method: 'POST',
       body: JSON.stringify({ action, id, content, password })
     });
     const result = await res.json();
-
     if (result.status === 200) {
       alert(action === 'update' ? "수정되었습니다." : "삭제되었습니다.");
-      this.cache = {}; // 수정/삭제 시 캐시 초기화
+      this.cache = {}; // 캐시 비우기
       this.render(1);
     } else {
-      alert("비밀번호가 틀렸습니다.");
+      alert(result.message || "비밀번호가 틀렸습니다.");
     }
-  },
+  } catch (e) {
+    alert("CORS 오류 또는 네트워크 에러가 발생했습니다. 서버 배포 설정을 확인하세요.");
+  }
+}
 
   async postComment(content, password) {
     const response = await fetch(this.config.apiUrl, {
