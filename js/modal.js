@@ -39,11 +39,28 @@ export const ModalModule = {
 
   navigate(dir) {
     this.currentIndex = (this.currentIndex + dir + this.imageList.length) % this.imageList.length;
-    this.modalImg.src = this.imageList[this.currentIndex];
-    this.modalImg.style.transform = '';
-    this.scale = 1;
-    this.lastTX = 0;
-    this.lastTY = 0;
+    const nextSrc = this.imageList[this.currentIndex];
+  
+    // 슬라이딩 애니메이션
+    const img = this.modalImg;
+    const slideOut = dir > 0 ? '-100%' : '100%';
+    const slideIn = dir > 0 ? '100%' : '-100%';
+  
+    img.style.transition = 'transform 0.3s ease';
+    img.style.transform = `translateX(${slideOut})`;
+  
+    setTimeout(() => {
+      img.src = nextSrc;
+      img.style.transition = 'none';
+      img.style.transform = `translateX(${slideIn})`;
+      setTimeout(() => {
+        img.style.transition = 'transform 0.3s ease';
+        img.style.transform = 'translateX(0)';
+        this.scale = 1;
+        this.lastTX = 0;
+        this.lastTY = 0;
+      }, 20);
+    }, 300);
   },
 
   _resetTransform(img) {
