@@ -94,6 +94,12 @@ export const ModalModule = {
         lastTX = 0;
         lastTY = 0;
         img.style.transform = '';
+      } else {
+        const maxX = (img.offsetWidth * (this.scale - 1)) / 2;
+        const maxY = (img.offsetHeight * (this.scale - 1)) / 2;
+        lastTX = Math.min(maxX, Math.max(-maxX, lastTX));
+        lastTY = Math.min(maxY, Math.max(-maxY, lastTY));
+        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
       }
     });
   },
