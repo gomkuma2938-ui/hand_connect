@@ -56,7 +56,7 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 
 /* 4. 댓글 섹션 */
 #comment-section { 
-    padding: 20px; 
+    padding: 60px 20px 20px 20px; 
     max-width: 600px; 
     margin: 0 auto; /* ❗ 마진을 0으로 해서 회색 줄이 안 보이게 함 */
 }
@@ -186,7 +186,7 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap);
     padding: var(--gap);
-    padding-bottom: 60px; /* 여백이 너무 길면 줄이세요 */
+    padding-bottom: 100px; /* 여백이 너무 길면 줄이세요 */
     background: #fff;
 }
 
