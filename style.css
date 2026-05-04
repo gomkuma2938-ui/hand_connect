@@ -91,7 +91,6 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     justify-content: center;
 }
 
-/* 나머지 버튼 클래스명 유지 */
 .submit-edit-btn, .cancel-btn, .edit-btn, .del-btn {
     height: 28px !important; padding: 0 12px !important;
     font-size: 0.75rem !important; border-radius: 4px; cursor: pointer;
@@ -110,9 +109,42 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 .edit-field-container { background: #f8f8f8; border: 1px solid #eee; padding: 12px; border-radius: 4px; margin-top: 10px; }
 .edit-textarea { width: 100%; height: 70px; padding: 10px; box-sizing: border-box; margin-bottom: 8px; resize: none; }
 .edit-form-bottom { display: flex; justify-content: space-between; align-items: center; }
-.edit-pw-input { width: 100px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+.edit-pw-input { 
+    width: 150px; /* 기존 100px에서 150px로 늘림 */
+    padding: 8px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    font-size: 0.8rem; 
+}
 
 .error-msg { color: #e74c3c; font-size: 11px; margin-top: 6px; }
+
+/* 7. 인라인 수정/삭제 필드 디자인 수정 */
+.edit-field-container { 
+    background: #ffffff; /* 회색에서 흰색으로 변경 */
+    border: 1px solid var(--navy-color); /* 구분 잘 되게 테두리를 남색으로 변경 */
+    padding: 12px; 
+    border-radius: 4px; 
+    margin-top: 10px; 
+}
+
+/* 페이지네이션 버튼 스타일 수정 */
+.page-btn { 
+    background: none; 
+    border: 1px solid #ddd; 
+    padding: 5px 10px; 
+    color: #999; 
+    cursor: pointer; 
+    font-size: 0.9rem; 
+    border-radius: 4px;
+}
+/* 현재 페이지만 굵게 + 남색 표시 */
+.page-btn.active { 
+    color: var(--navy-color); 
+    font-weight: bold; 
+    border: 1px solid var(--navy-color); 
+    text-decoration: none; 
+}
 
 /* 로더 */
 .spinner-container { display: flex; justify-content: center; padding: 50px 0; }
