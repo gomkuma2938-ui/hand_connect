@@ -25,7 +25,7 @@ export const GalleryModule = {
       return `
         <div class="grid-item ${isBig ? 'big' : ''}">
           <img data-src="img/${num}.jpg"
-               src=""
+               src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                onerror="this.style.display='none'; this.parentElement.style.background='#eee';"
                onclick="window.openModal('img/${num}.jpg')"
                class="lazy">
