@@ -34,7 +34,7 @@ export const ModalModule = {
     // 2. 이미지가 로드된 후 핀치줌 초기화
     this.modalImg.onload = () => {
         setTimeout(() => {
-            const TargetLib = window.PinchZoom;
+            const TargetLib = window.PinchZoom || PinchZoom;
             if (typeof TargetLib !== 'undefined') {
                 // 기존 인스턴스 파괴 후 재생성 (확실한 리셋)
                 if (this.pz) {
