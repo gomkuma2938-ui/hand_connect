@@ -6,7 +6,12 @@ export const ModalModule = {
     this.closeBtn = document.querySelector('.close-btn');
     this.imageList = [];
     this.currentIndex = 0;
-    
+    this.scale = 1;
+
+    // 터치 상태 (navigate에서도 접근 가능하게 여기서 선언)
+    this.lastTX = 0;
+    this.lastTY = 0;
+
     document.querySelector('.prev-btn').onclick = (e) => {
       e.stopPropagation();
       this.navigate(-1);
@@ -15,8 +20,6 @@ export const ModalModule = {
       e.stopPropagation();
       this.navigate(1);
     };
-
-    this.scale = 1;
 
     if (this.closeBtn) {
       this.closeBtn.onclick = (e) => {
@@ -41,6 +44,8 @@ export const ModalModule = {
     this.modalImg.src = this.imageList[this.currentIndex];
     this.modalImg.style.transform = '';
     this.scale = 1;
+    this.lastTX = 0;
+    this.lastTY = 0;
   },
 
   _initTouch() {
@@ -48,7 +53,7 @@ export const ModalModule = {
     let startDist = 0;
     let startScale = 1;
     let startX = 0, startY = 0;
-    let lastTX = 0, lastTY = 0;
+    let swipeStartX = 0;
 
     img.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
@@ -58,10 +63,13 @@ export const ModalModule = {
           e.touches[0].clientY - e.touches[1].clientY
         );
         startScale = this.scale;
-      } else if (e.touches.length === 1 && this.scale > 1) {
-        e.preventDefault();
-        startX = e.touches[0].clientX - lastTX;
-        startY = e.touches[0].clientY - lastTY;
+      } else if (e.touches.length === 1) {
+        swipeStartX = e.touches[0].clientX;
+        if (this.scale > 1) {
+          e.preventDefault();
+          startX = e.touches[0].clientX - this.lastTX;
+          startY = e.touches[0].clientY - this.lastTY;
+        }
       }
     }, { passive: false });
 
@@ -73,33 +81,39 @@ export const ModalModule = {
           e.touches[0].clientY - e.touches[1].clientY
         );
         this.scale = Math.min(4, Math.max(1, startScale * (dist / startDist)));
-        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+        img.style.transform = `translate(${this.lastTX}px, ${this.lastTY}px) scale(${this.scale})`;
       } else if (e.touches.length === 1 && this.scale > 1) {
         e.preventDefault();
-        lastTX = e.touches[0].clientX - startX;
-        lastTY = e.touches[0].clientY - startY;
+        this.lastTX = e.touches[0].clientX - startX;
+        this.lastTY = e.touches[0].clientY - startY;
 
         const maxX = (img.offsetWidth * (this.scale - 1)) / 2;
         const maxY = (img.offsetHeight * (this.scale - 1)) / 2;
-        lastTX = Math.min(maxX, Math.max(-maxX, lastTX));
-        lastTY = Math.min(maxY, Math.max(-maxY, lastTY));
+        this.lastTX = Math.min(maxX, Math.max(-maxX, this.lastTX));
+        this.lastTY = Math.min(maxY, Math.max(-maxY, this.lastTY));
 
-        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+        img.style.transform = `translate(${this.lastTX}px, ${this.lastTY}px) scale(${this.scale})`;
       }
     }, { passive: false });
 
-    img.addEventListener('touchend', () => {
+    img.addEventListener('touchend', (e) => {
       if (this.scale <= 1) {
-        this.scale = 1;
-        lastTX = 0;
-        lastTY = 0;
-        img.style.transform = '';
+        // 스와이프로 이미지 넘기기
+        const swipeDist = e.changedTouches[0].clientX - swipeStartX;
+        if (Math.abs(swipeDist) > 50) {
+          this.navigate(swipeDist < 0 ? 1 : -1);
+        } else {
+          this.scale = 1;
+          this.lastTX = 0;
+          this.lastTY = 0;
+          img.style.transform = '';
+        }
       } else {
         const maxX = (img.offsetWidth * (this.scale - 1)) / 2;
         const maxY = (img.offsetHeight * (this.scale - 1)) / 2;
-        lastTX = Math.min(maxX, Math.max(-maxX, lastTX));
-        lastTY = Math.min(maxY, Math.max(-maxY, lastTY));
-        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+        this.lastTX = Math.min(maxX, Math.max(-maxX, this.lastTX));
+        this.lastTY = Math.min(maxY, Math.max(-maxY, this.lastTY));
+        img.style.transform = `translate(${this.lastTX}px, ${this.lastTY}px) scale(${this.scale})`;
       }
     });
   },
@@ -111,6 +125,8 @@ export const ModalModule = {
     this.modalImg.src = src;
     this.modalImg.style.transform = '';
     this.scale = 1;
+    this.lastTX = 0;
+    this.lastTY = 0;
     document.body.style.overflow = 'hidden';
   },
 
@@ -119,6 +135,8 @@ export const ModalModule = {
       this.modal.style.display = 'none';
       this.modalImg.style.transform = '';
       this.scale = 1;
+      this.lastTX = 0;
+      this.lastTY = 0;
       document.body.style.overflow = 'auto';
     }
   }
