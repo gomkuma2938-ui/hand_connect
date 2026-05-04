@@ -47,12 +47,12 @@ async handleCommentSubmit() {
 
     try {
         const res = await fetch(CommentsModule.config.apiUrl, {
-            method: 'POST',
-            body: JSON.stringify({ 
-                action: 'create', // insert -> create로 변경 (백엔드 일치)
-                content: content, 
-                password: password 
-            })
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'create', // insert가 아니라 백엔드에 적힌 create여야 함
+            content: content, 
+            password: password 
+          })
         });
 
         // 성공 처리
