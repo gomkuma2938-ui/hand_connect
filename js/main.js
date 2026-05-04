@@ -4,12 +4,25 @@ import { CommentsModule } from './comments.js';
 
 const app = {
   async init() {
+    // 1. 갤러리 로딩
     try {
       GalleryModule.init('gallery-container', 76);
+    } catch (e) {
+      console.error("갤러리 초기화 실패:", e);
+    }
+
+    // 2. 모달 기능 활성화
+    try {
       ModalModule.init();
+    } catch (e) {
+      console.error("모달 초기화 실패:", e);
+    }
+
+    // 3. 댓글 리스트 로드
+    try {
       await CommentsModule.init('comment-list');
     } catch (e) {
-      console.error("초기화 실패:", e);
+      console.error("댓글 로딩 실패:", e);
     }
   },
   
@@ -18,6 +31,8 @@ const app = {
     const passwordEl = document.getElementById('pw-input');
     const errorMsg = document.getElementById('error-message');
     const btn = document.getElementById('submit-btn');
+
+    if (!contentEl || !passwordEl) return;
 
     const content = contentEl.value.trim();
     const password = passwordEl.value.trim();
@@ -52,6 +67,7 @@ const app = {
             errorMsg.style.color = "#e74c3c";
             CommentsModule.render(1); 
         }, 1000);
+
     } catch (e) {
         errorMsg.textContent = "네트워크 오류가 발생했습니다.";
         errorMsg.style.display = "block";
@@ -62,6 +78,8 @@ const app = {
   }
 };
 
-// 전역 함수 연결
+// 전역에서 버튼 클릭 시 실행할 수 있도록 연결
 window.submitComment = () => app.handleCommentSubmit();
+
+// 페이지 로드 완료 시 초기화
 document.addEventListener('DOMContentLoaded', () => app.init());
