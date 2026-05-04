@@ -2,7 +2,7 @@ export const CommentsModule = {
   config: {
     apiUrl: 'https://script.google.com/macros/s/AKfycbyVKORhy8YN5vaWf6xIrikRjYwhodtfEQDdkpXvPALD-GIfXlW-kqOr81H_gvRfvXhg6g/exec', 
     pageSize: 10,
-    pageGroupSize: 5 // 5페이지씩 묶음 처리
+    pageGroupSize: 5 
   },
   cache: {},
 
@@ -63,7 +63,7 @@ export const CommentsModule = {
               <input type="password" id="action-pw-${safeHtmlId}" placeholder="비밀번호" class="edit-pw-input">
               <div class="edit-btns">
                 <button id="action-submit-${safeHtmlId}" class="submit-edit-btn">확인</button>
-                <button class="cancel-edit-btn" data-id="${originalId}">취소</button>
+                <button class="cancel-btn" data-id="${originalId}">취소</button>
               </div>
             </div>
           </div>
@@ -71,11 +71,11 @@ export const CommentsModule = {
       `;
     }).join('');
 
-    // 인라인 호출 방식에서 이벤트 리스너 방식으로 변경 (에러 방지)
+    // 이벤트 리스너 바인딩
     this.listContainer.querySelectorAll('.edit-btn, .del-btn').forEach(btn => {
       btn.onclick = () => this.openActionField(btn.dataset.id, btn.dataset.action);
     });
-    this.listContainer.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+    this.listContainer.querySelectorAll('.cancel-btn').forEach(btn => {
       btn.onclick = () => this.closeActionField(btn.dataset.id);
     });
   },
@@ -118,10 +118,10 @@ export const CommentsModule = {
     
     if (action === 'delete') {
       if (input) input.style.display = 'none';
-      submitBtn.innerText = '삭제 확정';
+      submitBtn.innerText = '삭제'; // '삭제 확정'에서 '삭제'로 변경
     } else {
       if (input) input.style.display = 'block';
-      submitBtn.innerText = '수정 완료';
+      submitBtn.innerText = '수정'; // '수정 완료'에서 '수정'으로 변경
     }
     
     submitBtn.onclick = () => this.submitAction(id, action);
