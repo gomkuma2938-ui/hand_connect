@@ -117,6 +117,3 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 .page-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 0.9rem; }
 .page-btn.active { color: #0095f6; font-weight: bold; text-decoration: underline; }
 .page-arrow { font-weight: bold; color: var(--main-color); }
-
-/* 에러 문구 */
-#error-message { color: #ed4956; font-size: 0.8rem; min-height: 1.2em; }
