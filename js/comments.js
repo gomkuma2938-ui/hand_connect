@@ -1,9 +1,8 @@
 export const CommentsModule = {
   config: {
-    // 1. 새로 바뀐 주소 적용 완료
     apiUrl: 'https://script.google.com/macros/s/AKfycbyVKORhy8YN5vaWf6xIrikRjYwhodtfEQDdkpXvPALD-GIfXlW-kqOr81H_gvRfvXhg6g/exec', 
     pageSize: 10,
-    pageGroupSize: 5
+    pageGroupSize: 5 // 5페이지씩 묶음 처리
   },
   cache: {},
 
@@ -23,7 +22,6 @@ export const CommentsModule = {
 
     try {
       this.listContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
-      
       const response = await fetch(`${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}`);
       if (!response.ok) throw new Error('Network response was not ok');
       const result = await response.json(); 
@@ -33,7 +31,7 @@ export const CommentsModule = {
       this.renderPagination(result.total, page);
     } catch (e) {
       console.error("데이터 로드 실패:", e);
-      this.listContainer.innerHTML = '<p style="text-align:center; padding:20px; color:red;">댓글을 불러오지 못했습니다. (URL 및 권한 확인 필요)</p>';
+      this.listContainer.innerHTML = '<p style="text-align:center; padding:20px; color:red;">데이터를 불러오지 못했습니다.</p>';
     }
   },
 
@@ -44,16 +42,10 @@ export const CommentsModule = {
     }
 
     this.listContainer.innerHTML = comments.map(c => {
-      // 서버용 원본 ID (ISOString)
       const originalId = String(c.id);
-      // HTML 요소용 안전한 ID (특수문자 제거)
       const safeHtmlId = originalId.replace(/[^a-zA-Z0-9]/g, ""); 
-      
       const date = new Date(originalId);
-      const formattedDate = isNaN(date.getTime()) ? "방금 전" : date.toLocaleString('ko-KR', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', hour12: false
-      });
+      const formattedDate = isNaN(date.getTime()) ? "방금 전" : date.toLocaleString('ko-KR');
 
       return `
         <div class="comment-item">
@@ -61,37 +53,55 @@ export const CommentsModule = {
           <div class="comment-footer">
             <span class="comment-date">${formattedDate}</span>
             <div class="btn-group">
-              <button class="edit-btn" onclick="CommentsModule.openActionField('${originalId}', 'update')">수정</button>
-              <button class="del-btn" onclick="CommentsModule.openActionField('${originalId}', 'delete')">삭제</button>
+              <button class="edit-btn" data-id="${originalId}" data-action="update">수정</button>
+              <button class="del-btn" data-id="${originalId}" data-action="delete">삭제</button>
             </div>
           </div>
-          <!-- 수정/삭제 영역 -->
           <div id="action-area-${safeHtmlId}" class="edit-field-container" style="display:none; margin-top:10px;">
             <textarea id="edit-input-${safeHtmlId}" class="edit-textarea">${c.content}</textarea>
             <div class="edit-form-bottom">
               <input type="password" id="action-pw-${safeHtmlId}" placeholder="비밀번호" class="edit-pw-input">
               <div class="edit-btns">
                 <button id="action-submit-${safeHtmlId}" class="submit-edit-btn">확인</button>
-                <button onclick="CommentsModule.closeActionField('${originalId}')" class="cancel-edit-btn">취소</button>
+                <button class="cancel-edit-btn" data-id="${originalId}">취소</button>
               </div>
             </div>
           </div>
         </div>
       `;
     }).join('');
+
+    // 인라인 호출 방식에서 이벤트 리스너 방식으로 변경 (에러 방지)
+    this.listContainer.querySelectorAll('.edit-btn, .del-btn').forEach(btn => {
+      btn.onclick = () => this.openActionField(btn.dataset.id, btn.dataset.action);
+    });
+    this.listContainer.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+      btn.onclick = () => this.closeActionField(btn.dataset.id);
+    });
   },
 
   renderPagination(total, current) {
     const totalPages = Math.ceil(total / this.config.pageSize);
-    if (totalPages <= 1) {
-      this.pageContainer.innerHTML = '';
-      return;
-    }
+    if (totalPages <= 1) { this.pageContainer.innerHTML = ''; return; }
+
+    const groupSize = this.config.pageGroupSize;
+    const currentGroup = Math.ceil(current / groupSize);
+    const startPage = (currentGroup - 1) * groupSize + 1;
+    const endPage = Math.min(startPage + groupSize - 1, totalPages);
 
     let html = '';
-    for (let i = 1; i <= totalPages; i++) {
+    if (currentGroup > 1) {
+      html += `<button class="page-btn" onclick="changePage(${startPage - 1})">이전</button>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
       html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
     }
+
+    if (endPage < totalPages) {
+      html += `<button class="page-btn" onclick="changePage(${endPage + 1})">다음</button>`;
+    }
+
     this.pageContainer.innerHTML = html;
   },
 
@@ -114,7 +124,6 @@ export const CommentsModule = {
       submitBtn.innerText = '수정 완료';
     }
     
-    // 원본 id를 전달하도록 설정
     submitBtn.onclick = () => this.submitAction(id, action);
   },
 
@@ -140,28 +149,14 @@ export const CommentsModule = {
       const result = await res.json();
 
       if (result.status === 200) {
-        alert(action === 'update' ? "수정되었습니다." : "삭제되었습니다.");
+        alert("완료되었습니다.");
         this.cache = {}; 
         this.render(1);
       } else {
         alert(result.message || "비밀번호가 틀렸습니다.");
       }
     } catch (e) {
-      alert("작업 실패: 서버 연결 상태를 확인하세요.");
-    }
-  },
-
-  async postComment(content, password) {
-    try {
-      const res = await fetch(this.config.apiUrl, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'create', content, password })
-      });
-      const result = await res.json();
-      if (result.status === 200) this.cache = {}; 
-      return result;
-    } catch (e) {
-      return { status: 500 };
+      alert("서버 연결 실패");
     }
   }
 };
