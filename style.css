@@ -23,7 +23,7 @@ body {
 
 /* 1. 헤더 */
 header { background: #fff; text-align: center; border-bottom: 1px solid var(--border-color); }
-.intro-text { padding: 25px 20px; }
+.intro-text { padding: 25px 20px; magin-bottom:30px; }
 .intro-text h2 { margin: 0 0 10px; font-size: 1.2rem; font-weight: 600; }
 .intro-text p { margin: 0; font-size: 0.9rem; color: #666; word-break: keep-all; }
 
