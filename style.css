@@ -1,4 +1,4 @@
-/* 0. 변수 */
+/* 0. 초기화 및 이미지 레이아웃 보정 */
 :root {
     --navy: #1a237e;
     --gray-bg: #f0f0f0;
@@ -6,23 +6,38 @@
     --border: #ddd;
 }
 
-/* 1. 소제목: 입력 필드 보다 위에서 중심을 잡아줌 */
-.comments-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-align: center;
-    margin: 30px 0 20px;
-    width: 100%;
-    display: block;
-    color: #333;
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0; padding: 0;
+    line-height: 1.6;
+    word-break: keep-all;
 }
 
-/* 2. 버튼 규격 통일 (시발 소리 안 나오게 높이/폰트 고정) */
+/* 이미지 나가리 방지: 부모 너비를 절대 넘지 않게 고정 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 1. 소제목 (최상단 중앙 배치) */
+.comments-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 40px 0 20px;
+    color: #222;
+    width: 100%;
+}
+
+/* 2. 버튼 규격 통일 (높이 28px 고정) */
 .edit-btn, .del-btn, .submit-edit-btn, .cancel-btn {
     height: 28px !important;
-    line-height: 26px !important;
+    min-width: 50px;
     padding: 0 12px !important;
     font-size: 12px !important;
+    font-weight: 500;
     border-radius: 4px !important;
     cursor: pointer;
     box-sizing: border-box;
@@ -30,6 +45,7 @@
     align-items: center;
     justify-content: center;
     border: none;
+    transition: opacity 0.1s;
 }
 
 /* 네이비 버튼 (삭제, 확인) - 색상 고정 */
@@ -38,8 +54,8 @@
     color: white !important;
 }
 .del-btn:hover, .submit-edit-btn:hover {
-    background-color: var(--navy) !important; /* 색상 유지 */
-    opacity: 0.8; /* 클릭감만 살짝 */
+    background-color: var(--navy) !important;
+    opacity: 0.85;
 }
 
 /* 회색 버튼 (수정, 취소) */
@@ -49,32 +65,68 @@
     border: 1px solid var(--border) !important;
 }
 
-/* 3. 레이아웃 정리 */
-.comment-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-.comment-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-.btn-group, .edit-btns { display: flex; gap: 4px; }
+/* 3. 댓글 섹션 레이아웃 */
+#comment-section {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
 
+.comment-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.comment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.btn-group { display: flex; gap: 4px; }
+
+/* 4. 수정/삭제 필드 */
 .edit-field-container {
     background: #f9f9f9;
-    padding: 10px;
-    border-radius: 4px;
+    padding: 12px;
+    border-radius: 6px;
     margin-top: 10px;
     border: 1px solid #eee;
 }
+
 .edit-textarea {
-    width: 100%; height: 60px; margin-bottom: 8px;
-    padding: 8px; box-sizing: border-box; border: 1px solid #ccc;
+    width: 100%;
+    height: 70px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    margin-bottom: 8px;
 }
-.edit-form-bottom { display: flex; justify-content: space-between; }
-.edit-pw-input { width: 80px; padding: 4px; border: 1px solid #ccc; }
+
+.edit-form-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-pw-input {
+    width: 90px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
 
 /* 로딩 스피너 */
-.spinner-container { display: flex; justify-content: center; padding: 30px; }
+.spinner-container { display: flex; justify-content: center; padding: 40px; }
 .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid var(--navy);
+    width: 24px; height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--navy);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 1s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
