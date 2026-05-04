@@ -38,3 +38,27 @@ const app = {
 };
 
 document.addEventListener('DOMContentLoaded', () => app.init());
+
+document.addEventListener('DOMContentLoaded', () => app.init());
+
+// HTML의 onclick에서 찾을 수 있도록 window 객체에 직접 할당
+window.submitComment = () => {
+  // main.js 내부의 app 객체에 접근하여 실행
+  const content = document.getElementById('comment-input').value;
+  const password = document.getElementById('pw-input').value;
+  const errorMsg = document.getElementById('error-message');
+
+  if (!content || password.length < 4) {
+    errorMsg.textContent = "내용과 비밀번호(4자 이상)를 확인해주세요.";
+    return;
+  }
+  
+  // CommentsModule은 이미 상단에서 import 되어 있어야 합니다.
+  import('./comments.js').then(m => {
+    m.CommentsModule.postComment(content, password).then(result => {
+        if (result.status === 200) {
+            location.reload(); // 성공 시 새로고침하여 댓글 확인
+        }
+    });
+  });
+};
