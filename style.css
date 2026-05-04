@@ -5,13 +5,17 @@
   --border-color: #dbdbdb;
 }
 
-body { 
-  margin: 0; padding: 0; 
-  background: var(--bg-color); 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: var(--main-color);
-  line-height: 1.5;
+/* 구글 폰트에서 Noto Sans KR 불러오기 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+body {
+  font-family: 'Noto Sans KR', sans-serif; /* 전체 폰트 변경 */
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  color: #333;
 }
+
 
 /* 1. 헤더 & 감성 문구 */
 header { background: #fff; text-align: center; border-bottom: 1px solid var(--border-color); }
@@ -52,33 +56,57 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
   font-size: 35px; color: white; z-index: 2100; cursor: pointer; padding: 10px;
 }
 
-/* 4. 댓글 영역 */
-#comment-section { padding: 20px; background: #fff; margin-top: 10px; }
-
-/* 작성창 */
-#comment-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-#comment-input { 
-  width: 100%; height: 80px; padding: 12px; border: 1px solid var(--border-color);
-  border-radius: 8px; resize: none; font-size: 0.95rem; box-sizing: border-box;
-}
-.form-bottom { display: flex; gap: 10px; }
-#pw-input { 
-  flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem;
-}
-#submit-btn { 
-  padding: 10px 20px; background: #0095f6; color: white; border: none; 
-  border-radius: 8px; font-weight: 600; cursor: pointer;
+#comment-section {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-/* 댓글 리스트 */
-.comment-item { 
-  padding: 15px 0; border-bottom: 1px solid #f0f0f0; position: relative;
+#comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 필드 사이 간격을 8px로 좁힘 */
+  margin-bottom: 20px;
 }
-.comment-content { font-size: 0.95rem; margin-bottom: 5px; white-space: pre-wrap; }
-.comment-date { font-size: 0.75rem; color: #999; }
-.comment-actions { position: absolute; right: 0; top: 15px; display: flex; gap: 8px; }
-.comment-actions button { 
-  background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer;
+
+#comment-input {
+  width: 100%;
+  height: 80px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: none;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.form-bottom {
+  display: flex;
+  gap: 8px;
+}
+
+#pw-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+#submit-btn {
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 경고 문구 위치: 비번 필드보다 더 아래로 설정 */
+#error-message {
+  color: #ff4d4d;
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 4px;
 }
 
 /* 페이지네이션 */
