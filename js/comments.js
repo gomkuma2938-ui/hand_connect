@@ -30,10 +30,38 @@ export const CommentsModule = {
         <div class="comment-content">${c.content}</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
           <span style="font-size:0.75rem; color:#999;">${c.id}</span>
-          <button class="del-btn" onclick="deleteComment('${c.id}')">삭제</button>
+          <div class="btn-group">
+            <button class="edit-btn" onclick="editComment('${c.id}', '${c.content}')">수정</button>
+            <button class="del-btn" onclick="deleteComment('${c.id}')">삭제</button>
+          </div>
         </div>
       </div>
     `).join('');
+    
+    // 수정 기능 로직 추가
+    async handleEdit(id, oldContent) {
+      const newContent = prompt("수정할 내용을 입력하세요.", oldContent);
+      if (!newContent || newContent === oldContent) return;
+    
+      const pw = prompt("비밀번호를 입력하세요.");
+      if (!pw) return;
+    
+      const res = await fetch(this.config.apiUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'update', id, content: newContent, password: pw })
+      });
+    
+      const result = await res.json();
+      if (result.status === 200) {
+        alert("수정되었습니다.");
+        this.render(1); // 페이지 새로고침 없이 리스트만 갱신
+      } else {
+        alert("비밀번호가 틀렸습니다.");
+      }
+    }
+    
+    // 전역 연결
+    window.editComment = (id, content) => CommentsModule.handleEdit(id, content);
 
       // 페이지네이션 실행
       this.renderPagination(result.total, page, result.pageSize);
