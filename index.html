@@ -1,53 +1,85 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>손잇기 기도</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/pinch-zoom-js/dist/pinch-zoom.umd.js"></script>
-</head>
-<body>
-  <header>
-    <img src="img/title.png" alt="손잇기 기도" style="width:100%;">
-    <div class="intro-text">
-      <h2>누군가 당신을 위해 기도합니다</h2>
-      <p>내가 홀로 외로워서 마음이 무너질 때 누군가 널 위해 기도하네</p>
-    </div>
-  </header>
+// ❗ 1. 누락된 import 추가 (경로 확인 필수)
+import { GalleryModule } from './gallery.js';
+import { ModalModule } from './modal.js';
+import { CommentsModule } from './comments.js';
 
-<main id="gallery-container"></main>
+const app = {
+  async init() {
+    // ❗ 2. 갤러리 로딩 (가장 먼저 실행되도록 분리)
+    try {
+      GalleryModule.init('gallery-container', 76);
+    } catch (e) {
+      console.error("갤러리 초기화 실패:", e);
+    }
+
+    // ❗ 3. 댓글 리스트 로드 (중복 제거 및 방어막)
+    try {
+      await CommentsModule.init('comment-list');
+    } catch (e) {
+      console.error("댓글 로딩 실패:", e);
+    }
+
+    // ❗ 4. 모달 기능 활성화
+    try {
+        ModalModule.init();
+      } catch (e) {
+        console.error("모달 초기화 실패:", e);
+      }
+    },
   
-  <!-- 댓글 섹션 시작 -->
-  <section id="comment-section">
-    <!-- 1. 소제목 삽입: 등록 영역 위로 이동 및 중앙 정렬 -->
-    <h3 class="comments-title" style="text-align: center; margin-bottom: 20px;">기도 동참하기🙏</h3>
+async handleCommentSubmit() {
+    const contentEl = document.getElementById('comment-input');
+    const passwordEl = document.getElementById('pw-input');
+    const errorMsg = document.getElementById('error-message');
+    const btn = document.getElementById('submit-btn');
 
-    <div id="comment-form">
-      <!-- 내용 입력 필드 -->
-      <textarea id="comment-input" placeholder="따뜻한 한마디를 남겨주세요."></textarea>
-      
-      <!-- 비번 필드와 등록 버튼 -->
-      <div class="form-bottom">
-        <input type="password" id="pw-input" placeholder="비밀번호(4자 이상)">
-        <button id="submit-btn" onclick="submitComment()">등록</button>
-      </div>
+    const content = contentEl.value.trim();
+    const password = passwordEl.value.trim();
 
-      <!-- ❗ 에러 문구를 가장 하단으로 이동 -->
-      <div id="error-message" class="error-msg" style="text-align:center; display:none;"></div>
-    </div>
+    if (!content || password.length < 4) {
+        errorMsg.textContent = "내용과 비밀번호(4자 이상)를 확인해주세요.";
+        errorMsg.style.display = "block";
+        return;
+    }
 
-    <div id="comment-list"></div>
-    <div id="pagination"></div>
-  </section>
+    btn.disabled = true;
+    btn.innerText = "등록 중...";
 
-  <div id="image-modal" class="modal">
-    <span class="close-btn">&times;</span>
-    <div class="zoom-container">
-      <img id="modal-img" src="">
-    </div>
-  </div>
+    try {
+        const res = await fetch(CommentsModule.config.apiUrl, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'create', // insert가 아니라 백엔드에 적힌 create여야 함
+            content: content, 
+            password: password 
+          })
+        });
 
-  <script type="module" src="js/main.js"></script>
-</body>
-</html>
+        // 성공 처리
+        contentEl.value = '';
+        passwordEl.value = '';
+        errorMsg.style.color = "blue";
+        errorMsg.textContent = "기도가 등록되었습니다.";
+        errorMsg.style.display = "block";
+        
+        setTimeout(() => {
+            errorMsg.style.display = "none";
+            errorMsg.style.color = "#e74c3c";
+            CommentsModule.render(1); 
+        }, 1000);
+
+    } catch (e) {
+        errorMsg.textContent = "네트워크 오류가 발생했습니다.";
+        errorMsg.style.display = "block";
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "등록";
+    }
+}
+  
+  window.submitComment = () => app.handleCommentSubmit();
+  document.addEventListener('DOMContentLoaded', () => app.init());
+
+// ❗ 6. 전역 함수는 깔끔하게 한 번만 연결
+window.submitComment = () => app.handleCommentSubmit();
+document.addEventListener('DOMContentLoaded', () => app.init());
