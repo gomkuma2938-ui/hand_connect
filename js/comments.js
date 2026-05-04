@@ -1,6 +1,6 @@
 export const CommentsModule = {
   config: {
-    apiUrl: 'YOUR_GAS_WEB_APP_URL', // 실제 배포 URL로 교체
+    apiUrl: 'https://script.google.com/macros/s/AKfycbwHeAcOZjRIECbK1txd9inRnnFkEVbW39Rfrpg4qyTMxxdB7gKmroAEABUgzc_8wdXupQ/exec', // 실제 배포 URL로 교체
     masterPw: '8124'
   },
 
