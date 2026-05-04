@@ -195,6 +195,12 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 
 .error-msg { color: #e74c3c; font-size: 11px; margin-top: 6px; }
 
+#comment-form {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
 /* 7. 페이지네이션 */
 #pagination { 
     display: flex; 
