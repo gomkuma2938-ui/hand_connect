@@ -1,7 +1,7 @@
 export const CommentsModule = {
   config: {
-    // 1. 배포된 웹 앱 URL을 여기에 넣으세요.
-    apiUrl: 'https://script.google.com/macros/s/AKfycbwHeAcOZjRIECbK1txd9inRnnFkEVbW39Rfrpg4qyTMxxdB7gKmroAEABUgzc_8wdXupQ/exec', 
+    // 1. 새로 바뀐 주소 적용 완료
+    apiUrl: 'https://script.google.com/macros/s/AKfycbyVKORhy8YN5vaWf6xIrikRjYwhodtfEQDdkpXvPALD-GIfXlW-kqOr81H_gvRfvXhg6g/exec', 
     pageSize: 10,
     pageGroupSize: 5
   },
@@ -25,6 +25,7 @@ export const CommentsModule = {
       this.listContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
       
       const response = await fetch(`${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}`);
+      if (!response.ok) throw new Error('Network response was not ok');
       const result = await response.json(); 
       
       this.cache[page] = result;
@@ -32,7 +33,7 @@ export const CommentsModule = {
       this.renderPagination(result.total, page);
     } catch (e) {
       console.error("데이터 로드 실패:", e);
-      this.listContainer.innerHTML = '<p style="text-align:center; padding:20px; color:red;">댓글을 불러오지 못했습니다.</p>';
+      this.listContainer.innerHTML = '<p style="text-align:center; padding:20px; color:red;">댓글을 불러오지 못했습니다. (URL 및 권한 확인 필요)</p>';
     }
   },
 
@@ -43,10 +44,13 @@ export const CommentsModule = {
     }
 
     this.listContainer.innerHTML = comments.map(c => {
-      // 서버에서 온 id(ISOString)를 안전하게 처리하기 위해 따옴표로 감쌈
-      const safeId = String(c.id);
-      const date = new Date(c.id);
-      const formattedDate = isNaN(date) ? "방금 전" : date.toLocaleString('ko-KR', {
+      // 서버용 원본 ID (ISOString)
+      const originalId = String(c.id);
+      // HTML 요소용 안전한 ID (특수문자 제거)
+      const safeHtmlId = originalId.replace(/[^a-zA-Z0-9]/g, ""); 
+      
+      const date = new Date(originalId);
+      const formattedDate = isNaN(date.getTime()) ? "방금 전" : date.toLocaleString('ko-KR', {
         year: 'numeric', month: '2-digit', day: '2-digit',
         hour: '2-digit', minute: '2-digit', hour12: false
       });
@@ -57,18 +61,18 @@ export const CommentsModule = {
           <div class="comment-footer">
             <span class="comment-date">${formattedDate}</span>
             <div class="btn-group">
-              <button class="edit-btn" onclick="CommentsModule.openActionField('${safeId}', 'update')">수정</button>
-              <button class="del-btn" onclick="CommentsModule.openActionField('${safeId}', 'delete')">삭제</button>
+              <button class="edit-btn" onclick="CommentsModule.openActionField('${originalId}', 'update')">수정</button>
+              <button class="del-btn" onclick="CommentsModule.openActionField('${originalId}', 'delete')">삭제</button>
             </div>
           </div>
-          <!-- 수정/삭제 입력 영역 (ID에 특수문자가 있을 수 있어 CSS escape 처리를 위해 기호 제거) -->
-          <div id="action-area-${safeId.replace(/[:.]/g, '-')}" class="edit-field-container" style="display:none; margin-top:10px;">
-            <textarea id="edit-input-${safeId.replace(/[:.]/g, '-')}" class="edit-textarea">${c.content}</textarea>
+          <!-- 수정/삭제 영역 -->
+          <div id="action-area-${safeHtmlId}" class="edit-field-container" style="display:none; margin-top:10px;">
+            <textarea id="edit-input-${safeHtmlId}" class="edit-textarea">${c.content}</textarea>
             <div class="edit-form-bottom">
-              <input type="password" id="action-pw-${safeId.replace(/[:.]/g, '-')}" placeholder="비밀번호" class="edit-pw-input">
+              <input type="password" id="action-pw-${safeHtmlId}" placeholder="비밀번호" class="edit-pw-input">
               <div class="edit-btns">
-                <button id="action-submit-${safeId.replace(/[:.]/g, '-')}" class="submit-edit-btn">확정</button>
-                <button onclick="CommentsModule.closeActionField('${safeId}')" class="cancel-edit-btn">취소</button>
+                <button id="action-submit-${safeHtmlId}" class="submit-edit-btn">확인</button>
+                <button onclick="CommentsModule.closeActionField('${originalId}')" class="cancel-edit-btn">취소</button>
               </div>
             </div>
           </div>
@@ -83,27 +87,21 @@ export const CommentsModule = {
       this.pageContainer.innerHTML = '';
       return;
     }
-    const groupSize = this.config.pageGroupSize;
-    const currentGroup = Math.ceil(current / groupSize);
-    const startPage = (currentGroup - 1) * groupSize + 1;
-    const endPage = Math.min(currentGroup * groupSize, totalPages);
 
     let html = '';
-    if (currentGroup > 1) html += `<button class="page-btn arrow" onclick="changePage(${startPage - 1})">&lt;</button>`;
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
     }
-    if (endPage < totalPages) html += `<button class="page-btn arrow" onclick="changePage(${endPage + 1})">&gt;</button>`;
     this.pageContainer.innerHTML = html;
   },
 
   openActionField(id, action) {
-    const safeId = id.replace(/[:.]/g, '-');
+    const safeHtmlId = id.replace(/[^a-zA-Z0-9]/g, "");
     document.querySelectorAll('.edit-field-container').forEach(el => el.style.display = 'none');
     
-    const area = document.getElementById(`action-area-${safeId}`);
-    const input = document.getElementById(`edit-input-${safeId}`);
-    const submitBtn = document.getElementById(`action-submit-${safeId}`);
+    const area = document.getElementById(`action-area-${safeHtmlId}`);
+    const input = document.getElementById(`edit-input-${safeHtmlId}`);
+    const submitBtn = document.getElementById(`action-submit-${safeHtmlId}`);
     
     if (!area) return;
     area.style.display = 'block';
@@ -116,20 +114,20 @@ export const CommentsModule = {
       submitBtn.innerText = '수정 완료';
     }
     
-    // 클릭 이벤트 바인딩 (id 원본값을 보냄)
+    // 원본 id를 전달하도록 설정
     submitBtn.onclick = () => this.submitAction(id, action);
   },
 
   closeActionField(id) {
-    const safeId = id.replace(/[:.]/g, '-');
-    const area = document.getElementById(`action-area-${safeId}`);
+    const safeHtmlId = id.replace(/[^a-zA-Z0-9]/g, "");
+    const area = document.getElementById(`action-area-${safeHtmlId}`);
     if (area) area.style.display = 'none';
   },
 
   async submitAction(id, action) {
-    const safeId = id.replace(/[:.]/g, '-');
-    const password = document.getElementById(`action-pw-${safeId}`).value.trim();
-    const content = action === 'update' ? document.getElementById(`edit-input-${safeId}`).value.trim() : "";
+    const safeHtmlId = id.replace(/[^a-zA-Z0-9]/g, "");
+    const password = document.getElementById(`action-pw-${safeHtmlId}`).value.trim();
+    const content = action === 'update' ? document.getElementById(`edit-input-${safeHtmlId}`).value.trim() : "";
     
     if (action === 'update' && !content) return alert("내용을 입력하세요.");
     if (!password) return alert("비밀번호를 입력하세요.");
@@ -137,10 +135,8 @@ export const CommentsModule = {
     try {
       const res = await fetch(this.config.apiUrl, {
         method: 'POST',
-        // GAS와의 호환성을 위해 headers 생략하거나 text/plain 사용
         body: JSON.stringify({ action, id, content, password })
       });
-      
       const result = await res.json();
 
       if (result.status === 200) {
@@ -148,11 +144,10 @@ export const CommentsModule = {
         this.cache = {}; 
         this.render(1);
       } else {
-        alert(result.message || "비밀번호가 틀렸거나 처리에 실패했습니다.");
+        alert(result.message || "비밀번호가 틀렸습니다.");
       }
     } catch (e) {
-      console.error("작업 에러:", e);
-      alert("서버 통신 중 오류가 발생했습니다.");
+      alert("작업 실패: 서버 연결 상태를 확인하세요.");
     }
   },
 
@@ -163,12 +158,9 @@ export const CommentsModule = {
         body: JSON.stringify({ action: 'create', content, password })
       });
       const result = await res.json();
-      if (result.status === 200) {
-        this.cache = {}; 
-      }
+      if (result.status === 200) this.cache = {}; 
       return result;
     } catch (e) {
-      console.error("등록 실패:", e);
       return { status: 500 };
     }
   }
