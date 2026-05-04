@@ -18,26 +18,26 @@ export const CommentsModule = {
             const res = await fetch(url);
             const result = await res.json();
 
+            // 백엔드 시트 구조에 맞게 데이터 추출
             let commentsData = result.data || [];
             const totalCount = result.total || 0;
 
             this.displayComments(commentsData);
             this.renderPagination(totalCount, page);
         } catch (e) {
-            this.listContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#999;">댓글을 불러올 수 없습니다.</p>`;
+            this.listContainer.innerHTML = `<p style="text-align:center; padding:20px;">댓글을 불러올 수 없습니다.</p>`;
         }
     },
 
+    // 사용자님의 클래스명을 그대로 사용한 렌더링 함수
     displayComments(data) {
         if (data.length === 0) {
-            this.listContainer.innerHTML = '<p style="text-align:center; padding:40px; color:#999;">첫 번째 기도를 남겨주세요 🙏</p>';
+            this.listContainer.innerHTML = '<p style="text-align:center; padding:20px;">첫 기도를 남겨주세요.</p>';
             return;
         }
 
         this.listContainer.innerHTML = data.map(item => {
-            // ID가 ISO날짜 형식이므로 특수문자 제거해서 DOM ID로 사용
             const safeId = String(item.id).replace(/[^a-zA-Z0-9]/g, "");
-            // 보기 좋은 날짜 형식으로 변환 (예: 2023-10-27)
             const displayDate = item.id ? item.id.split('T')[0] : "";
 
             return `
@@ -46,81 +46,62 @@ export const CommentsModule = {
                     <div class="comment-footer">
                         <span class="comment-date">${displayDate}</span>
                         <div class="btn-group">
-                            <button class="edit-btn" onclick="CommentsModule.showAction('${safeId}', 'update')">수정</button>
-                            <button class="del-btn" onclick="CommentsModule.showAction('${safeId}', 'delete')">삭제</button>
+                            <!-- 사용자님 CSS의 edit-btn, del-btn 사용 -->
+                            <button class="edit-btn" onclick="CommentsModule.toggleField('${safeId}', 'update')">수정</button>
+                            <button class="del-btn" onclick="CommentsModule.toggleField('${safeId}', 'delete')">삭제</button>
                         </div>
                     </div>
                     
-                    <div id="action-field-${safeId}" class="edit-field-container" style="display:none;">
-                        <textarea id="edit-input-${safeId}" class="edit-textarea" style="display:none;">${item.content}</textarea>
+                    <!-- 사용자님 CSS의 edit-field-container 사용 -->
+                    <div id="field-${safeId}" class="edit-field-container" style="display:none;">
+                        <textarea id="area-${safeId}" class="edit-textarea" style="display:none;">${item.content}</textarea>
                         <div class="edit-form-bottom">
-                            <input type="password" id="action-pw-${safeId}" class="edit-pw-input" placeholder="비밀번호">
+                            <input type="password" id="pw-${safeId}" class="edit-pw-input" placeholder="비번">
                             <div class="edit-btns">
-                                <button class="cancel-btn" onclick="CommentsModule.hideAction('${safeId}')">취소</button>
+                                <button class="cancel-btn" onclick="CommentsModule.toggleField('${safeId}')">취소</button>
                                 <button class="submit-edit-btn" onclick="CommentsModule.submitAction('${item.id}', '${safeId}')">확인</button>
                             </div>
                         </div>
-                        <div id="action-msg-${safeId}" class="error-msg" style="display:none;"></div>
+                        <div id="msg-${safeId}" class="error-msg" style="display:none;"></div>
                     </div>
                 </div>
             `;
         }).join('');
     },
 
-    showAction(safeId, type) {
-        this.hideAllActions();
-        const field = document.getElementById(`action-field-${safeId}`);
-        const input = document.getElementById(`edit-input-${safeId}`);
-        field.dataset.type = type; // 현재 액션 저장 (update/delete)
+    toggleField(safeId, type) {
+        const field = document.getElementById(`field-${safeId}`);
+        const area = document.getElementById(`area-${safeId}`);
+        if (!type) { field.style.display = 'none'; return; }
+        
         field.style.display = 'block';
-        input.style.display = (type === 'update') ? 'block' : 'none';
-    },
-
-    hideAction(safeId) {
-        document.getElementById(`action-field-${safeId}`).style.display = 'none';
-    },
-
-    hideAllActions() {
-        document.querySelectorAll('.edit-field-container').forEach(el => el.style.display = 'none');
+        field.dataset.action = type;
+        area.style.display = (type === 'update') ? 'block' : 'none';
     },
 
     async submitAction(originalId, safeId) {
-        const field = document.getElementById(`action-field-${safeId}`);
-        const action = field.dataset.type; // 백엔드 action (update 또는 delete)
-        const password = document.getElementById(`action-pw-${safeId}`).value;
-        const content = document.getElementById(`edit-input-${safeId}`).value;
-        const msgArea = document.getElementById(`action-msg-${safeId}`);
-
-        if (!password) {
-            msgArea.innerText = "비밀번호를 입력하세요.";
-            msgArea.style.display = "block";
-            return;
-        }
+        const field = document.getElementById(`field-${safeId}`);
+        const action = field.dataset.action; // update 또는 delete
+        const password = document.getElementById(`pw-${safeId}`).value;
+        const content = document.getElementById(`area-${safeId}`).value;
+        const msg = document.getElementById(`msg-${safeId}`);
 
         try {
-            // 백엔드 doPost 구조에 맞게 전달
             const res = await fetch(this.config.apiUrl, {
                 method: 'POST',
-                mode: 'no-cors', // GAS 특성상 응답 확인이 필요하면 아래 logic 참고
-                body: JSON.stringify({ 
-                    action: action, 
-                    id: originalId, 
-                    content: content, 
-                    password: password 
-                })
+                body: JSON.stringify({ action, id: originalId, content, password })
             });
+            const result = await res.json();
 
-            // GAS doPost는 'no-cors' 이슈가 있을 수 있어 일반 fetch 후 결과 확인
-            // 여기서는 단순화하여 2초 뒤 새로고침 (가장 확실한 방법)
-            msgArea.style.color = "blue";
-            msgArea.innerText = "처리 중...";
-            msgArea.style.display = "block";
-            
-            setTimeout(() => this.render(1), 1500);
-
+            if (result.status === 200) {
+                this.render(1);
+            } else {
+                msg.innerText = "비밀번호가 틀렸습니다.";
+                msg.style.display = "block";
+            }
         } catch (e) {
-            msgArea.innerText = "오류가 발생했습니다.";
-            msgArea.style.display = "block";
+            msg.innerText = "오류 발생";
+            msg.style.display = "block";
         }
     },
 
