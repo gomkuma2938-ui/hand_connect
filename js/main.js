@@ -11,7 +11,7 @@ const app = {
       console.error("모달 초기화 실패:", e);
     }
     try {
-      GalleryModule.init('gallery-container', 76);
+      GalleryModule.init('gallery-container', 75);
     } catch (e) {
       console.error("갤러리 초기화 실패:", e);
     }
