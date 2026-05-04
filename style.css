@@ -33,7 +33,6 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap);
     padding: var(--gap);
-    padding-bottom: 100px;
     background: #fff;
 }
 .grid-item { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #eee; }
@@ -103,7 +102,7 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     max-width: 600px; 
     margin: 0 auto;
 }
-.comments-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-align: center; }
+.comments-title { font-size: 1.2rem; font-weight: bold; margin-top: 60px; text-align: center; }
 
 .comments-info {
     text-align: center;
