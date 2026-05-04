@@ -58,17 +58,40 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 #comment-section { padding: 20px; max-width: 600px; margin: 0 auto; }
 .comments-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-align: center; }
 
-#comment-input, #pw-input {
+#comment-input {
     width: 100%; box-sizing: border-box; padding: 12px;
     border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; font-family: inherit;
 }
-.form-bottom { display: flex; gap: 10px; }
+
+/* 비밀번호 입력창: 한 줄 배치를 위해 margin 제거 및 flex 설정 */
+#pw-input {
+    flex: 1; /* 남는 공간 다 차지 */
+    box-sizing: border-box; padding: 12px;
+    border: 1px solid #ddd; border-radius: 4px; 
+    font-family: inherit;
+    margin-bottom: 0 !important; /* 버튼과 높이 맞추기 위해 마진 제거 */
+    height: 45px;
+}
+
+.form-bottom {
+    display: flex;
+    gap: 8px;
+    align-items: center; /* 입력창과 버튼 높이 정렬 */
+}
 
 /* 5. 버튼 시스템 */
 #submit-btn {
-    height: 45px; flex: 1; background: var(--navy-color); color: #fff;
+    width: 80px; /* 버튼 가로폭 고정 (글자 안 찌그러지게) */
+    height: 45px; 
+    background: var(--navy-color); color: #fff;
     border: none; border-radius: 4px; font-weight: 700; cursor: pointer;
+    flex-shrink: 0; /* 절대 찌그러지지 않게 설정 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+/* 나머지 버튼 클래스명 유지 */
 .submit-edit-btn, .cancel-btn, .edit-btn, .del-btn {
     height: 28px !important; padding: 0 12px !important;
     font-size: 0.75rem !important; border-radius: 4px; cursor: pointer;
