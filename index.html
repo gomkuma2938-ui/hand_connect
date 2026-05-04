@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>손잇기 기도</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- 핑거 줌 라이브러리 (선택하신 모바일 최적화용) -->
+  <script src="https://unpkg.com/pinch-zoom-js/dist/pinch-zoom.umd.js"></script>
+</head>
+<body>
+
+  <header>
+    <img src="img/title.jpg" alt="손잇기 기도" style="width:100%;">
+    <div class="intro-text">
+      <h2>소제목 문구</h2>
+      <p>감성 문구가 들어가는 자리입니다.</p>
+    </div>
+  </header>
+
+  <!-- 이미지 그리드 영역 -->
+  <main id="gallery-container"></main>
+
+  <!-- 댓글 영역 -->
+  <section id="comment-section">
+    <div id="comment-form">
+      <textarea id="comment-input" placeholder="안온한 마음을 나눠주세요."></textarea>
+      <input type="password" id="pw-input" placeholder="비밀번호(영문/숫자 4자 이상)">
+      <button onclick="app.submitComment()">등록</button>
+    </div>
+    <div id="comment-list"></div>
+    <div id="pagination"></div>
+  </section>
+
+  <!-- 모달 창 -->
+  <div id="image-modal" class="modal">
+    <span class="close-btn">&times;</span>
+    <div class="zoom-container">
+      <img id="modal-img" src="" alt="">
+    </div>
+  </div>
+
+  <script type="module">
+    import { GalleryModule } from './js/gallery.js';
+    import { CommentsModule } from './js/comments.js';
+
+    // 앱 초기화
+    window.addEventListener('DOMContentLoaded', () => {
+      GalleryModule.init('gallery-container', 76);
+      CommentsModule.init('comment-list');
+    });
+  </script>
+</body>
+</html>
