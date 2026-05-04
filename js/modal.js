@@ -4,7 +4,14 @@ export const ModalModule = {
     this.modalImg = document.getElementById('modal-img');
     this.zoomElement = document.querySelector('.zoom-container');
     this.closeBtn = document.querySelector('.close-btn');
-    this.pz = null;
+    
+    // 핀치줌 상태
+    this.scale = 1;
+    this.lastScale = 1;
+    this.originX = 0;
+    this.originY = 0;
+    this.lastX = 0;
+    this.lastY = 0;
 
     if (this.closeBtn) {
       this.closeBtn.onclick = (e) => {
@@ -12,54 +19,79 @@ export const ModalModule = {
         this.close();
       };
     }
-
     if (this.modal) {
       this.modal.onclick = (e) => {
-        // 이미지 영역 밖(배경) 클릭 시 닫기
-        if (e.target === this.modal || e.target === this.zoomElement) {
-          this.close();
-        }
+        if (e.target === this.modal) this.close();
       };
     }
+
+    this._initTouch();
+  },
+
+  _initTouch() {
+    const img = this.modalImg;
+    let startDist = 0;
+    let startScale = 1;
+    let startX = 0, startY = 0;
+    let lastTX = 0, lastTY = 0;
+
+    img.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        startDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        startScale = this.scale;
+      } else if (e.touches.length === 1 && this.scale > 1) {
+        e.preventDefault();
+        startX = e.touches[0].clientX - lastTX;
+        startY = e.touches[0].clientY - lastTY;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        this.scale = Math.min(4, Math.max(1, startScale * (dist / startDist)));
+        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+      } else if (e.touches.length === 1 && this.scale > 1) {
+        e.preventDefault();
+        lastTX = e.touches[0].clientX - startX;
+        lastTY = e.touches[0].clientY - startY;
+        img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', (e) => {
+      if (this.scale <= 1) {
+        this.scale = 1;
+        lastTX = 0;
+        lastTY = 0;
+        img.style.transform = '';
+      }
+    });
   },
 
   open(src) {
     if (!this.modal || !this.modalImg) return;
-    
-    // 1. 먼저 모달을 보여줌 (그래야 라이브러리가 크기 계산 가능)
     this.modal.style.display = 'flex';
     this.modalImg.src = src;
+    this.modalImg.style.transform = '';
+    this.scale = 1;
     document.body.style.overflow = 'hidden';
-
-    // 2. 이미지가 로드된 후 핀치줌 초기화
-    this.modalImg.onload = () => {
-        setTimeout(() => {
-            const TargetLib = window.PinchZoom || PinchZoom;
-            if (typeof TargetLib !== 'undefined') {
-                // 기존 인스턴스 파괴 후 재생성 (확실한 리셋)
-                if (this.pz) {
-                    this.pz.destroy();
-                }
-                this.pz = new TargetLib.default(this.zoomElement, {
-                    draggableUnzoomed: false,
-                    minZoom: 1,
-                    maxZoom: 4,
-                    onZoomStart: () => { if(this.closeBtn) this.closeBtn.style.visibility = 'hidden'; },
-                    onZoomEnd: () => { if(this.closeBtn) this.closeBtn.style.visibility = 'visible'; }
-                });
-            }
-        }, 100); // 0.1초 지연으로 렌더링 시간 확보
-    };
   },
 
   close() {
     if (this.modal) {
       this.modal.style.display = 'none';
+      this.modalImg.style.transform = '';
+      this.scale = 1;
       document.body.style.overflow = 'auto';
-      if (this.pz) {
-          this.pz.destroy();
-          this.pz = null;
-      }
     }
   }
 };
