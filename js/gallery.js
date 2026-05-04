@@ -12,7 +12,7 @@ export const GalleryModule = {
     const bigIndices = [];
     const usedSpaces = new Set(); // 이미 차지된 공간 체크
 
-    while(bigIndices.length < 6) {
+    while(bigIndices.length < 7) {
       const rand = Math.floor(Math.random() * (totalImages - 10));
       const col = rand % 3; // 0: 1열, 1: 2열, 2: 3열
 
