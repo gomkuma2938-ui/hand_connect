@@ -15,115 +15,190 @@
 
 body {
     font-family: 'Noto Sans KR', sans-serif;
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     background-color: #f9f9f9;
     color: var(--main-color);
     line-height: 1.6;
 }
 
-/* 1. 헤더 및 레이아웃 */
-header { background: #fff; text-align: center; border-bottom: 1px solid var(--border-color); }
+/* 1. 헤더 */
+header { 
+    background: #fff; 
+    text-align: center; 
+    border-bottom: 1px solid var(--border-color); 
+}
 .intro-text { padding: 25px 20px; }
 .intro-text h2 { margin: 0 0 10px; font-size: 1.2rem; font-weight: 600; }
 .intro-text p { margin: 0; font-size: 0.9rem; color: #666; word-break: keep-all; }
 
-#comment-section { padding: 20px; max-width: 600px; margin: 0 auto; }
+/* 2. 이미지 그리드 */
+#gallery-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: var(--gap);
+    padding: var(--gap);
+    background: #fff;
+}
+.grid-item { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #eee; }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
+.grid-item img:active { opacity: 0.8; }
+.grid-item.big { grid-column: span 2; grid-row: span 2; }
 
-/* 2. 소제목 (중앙 정렬) */
+/* 3. 모달 */
+.modal {
+    display: none; position: fixed; z-index: 2000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.98);
+    justify-content: center; align-items: center;
+}
+.zoom-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+.zoom-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.close-btn {
+    position: absolute; top: env(safe-area-inset-top, 20px); right: 20px;
+    font-size: 35px; color: white; z-index: 2100; cursor: pointer; padding: 10px;
+}
+
+/* 4. 댓글 섹션 레이아웃 */
+#comment-section {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 .comments-title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: bold;
+    margin-bottom: 15px;
     color: var(--main-color);
-    text-align: center;
-    margin: 40px 0 20px;
-    width: 100%;
+    padding-left: 5px;
 }
 
-/* 3. 입력 폼 */
-.comment-form { display: flex; flex-direction: column; gap: 10px; padding: 15px 0; }
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px 0;
+}
+
 #comment-input, #pw-input {
-    width: 100%; box-sizing: border-box;
-    padding: 12px; border: 1px solid #ddd;
-    border-radius: 4px; font-family: inherit;
-}
-#submit-btn {
-    background-color: var(--navy-color);
-    color: white; border: none; border-radius: 4px;
-    padding: 14px; font-weight: 700; cursor: pointer; width: 100%;
-}
-
-/* 4. 버튼 시스템 (크기 및 스타일 통일) */
-/* 모든 댓글 관련 버튼 크기 통일 */
-.edit-btn, .del-btn, .submit-edit-btn, .cancel-btn {
-    padding: 6px 12px !important; /* 크기 통일 */
-    font-size: 0.75rem !important;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.1s;
-    height: 28px; /* 높이 명시적 통일 */
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%; 
     box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    margin-bottom: 10px;
 }
 
-/* 네이비 버튼 (삭제, 확인) */
-.del-btn, .submit-edit-btn {
-    background-color: var(--navy-color) !important;
-    color: white !important;
-    border: none !important;
+/* 5. 버튼 시스템 */
+/* 메인 강조 버튼 (제출, 삭제, 확인) */
+#submit-btn, .del-btn, .submit-edit-btn {
+    background-color: var(--navy-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#submit-btn { width: 100%; padding: 14px; }
+.del-btn { padding: 4px 10px; font-size: 0.75rem; }
+.submit-edit-btn { padding: 8px 15px; font-size: 0.8rem; }
+
+#submit-btn:hover, .del-btn:hover, .submit-edit-btn:hover {
+    background-color: var(--navy-hover);
 }
 
-/* 삭제 버튼 색상 고정 (변화 금지) */
-.del-btn:hover, .submit-edit-btn:hover {
-    background-color: var(--navy-color) !important; /* 호버 시에도 색상 유지 */
-    opacity: 0.9;
-}
-
-/* 회색 버튼 (수정, 취소) */
+/* 서브 버튼 (수정, 취소) - 회색 톤 */
 .edit-btn, .cancel-btn {
     background-color: var(--gray-btn) !important;
     color: var(--gray-text) !important;
     border: 1px solid #ddd !important;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
+.edit-btn { padding: 4px 10px; font-size: 0.75rem; }
+.cancel-btn { padding: 8px 15px; font-size: 0.8rem; } /* 인라인 필드용 */
+
 .edit-btn:hover, .cancel-btn:hover {
     background-color: var(--gray-btn-hover) !important;
 }
 
-/* 5. 개별 댓글 아이템 */
-.comment-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-.comment-content { margin-bottom: 8px; font-size: 0.95rem; word-break: break-all; }
-.comment-footer { display: flex; justify-content: space-between; align-items: center; }
-.comment-date { font-size: 0.75rem; color: #bbb; }
+/* 6. 개별 댓글 아이템 */
+.comment-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+.comment-content {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-all;
+}
+.comment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.comment-date {
+    font-size: 0.75rem;
+    color: #bbb;
+}
 .btn-group { display: flex; gap: 5px; }
 
-/* 6. 인라인 수정/삭제 필드 */
+/* 7. 인라인 수정/삭제 필드 디자인 */
 .edit-field-container {
-    background: #f8f8f8; border: 1px solid #eee;
-    padding: 12px; border-radius: 4px; margin-top: 10px;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 10px;
 }
 .edit-textarea {
-    width: 100%; height: 60px; box-sizing: border-box;
-    padding: 10px; border: 1px solid #ccc; border-radius: 4px;
-    margin-bottom: 8px; font-family: inherit; resize: none;
+    width: 100%;
+    height: 70px;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-family: inherit;
+    resize: none;
 }
-.edit-form-bottom { display: flex; justify-content: space-between; align-items: center; }
+.edit-form-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 .edit-pw-input {
-    width: 90px; padding: 6px; border: 1px solid #ccc;
-    border-radius: 4px; font-size: 0.8rem;
+    width: 100px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8rem;
 }
-.edit-btns { display: flex; gap: 6px; align-items: center; }
+.edit-btns { display: flex; gap: 6px; }
 
-/* 7. 기타 */
-#pagination { display: flex; justify-content: center; gap: 15px; margin-top: 25px; padding-bottom: 40px; }
+/* 8. 기타 (페이지네이션 및 로더) */
+#pagination { 
+    display: flex; justify-content: center; gap: 15px; 
+    margin-top: 25px; padding-bottom: 40px;
+}
 .page-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 0.9rem; }
 .page-btn.active { color: var(--navy-color); font-weight: bold; text-decoration: underline; }
 
 .spinner-container { display: flex; justify-content: center; align-items: center; padding: 50px 0; }
 .spinner {
-    width: 24px; height: 24px;
-    border: 3px solid #f3f3f3; border-top: 3px solid var(--navy-color);
-    border-radius: 50%; animation: spin 1s linear infinite;
+    width: 30px; height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--navy-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
