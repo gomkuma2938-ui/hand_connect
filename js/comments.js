@@ -1,6 +1,8 @@
 export const CommentsModule = {
   config: {
-    apiUrl: 'https://script.google.com/macros/s/AKfycbwHeAcOZjRIECbK1txd9inRnnFkEVbW39Rfrpg4qyTMxxdB7gKmroAEABUgzc_8wdXupQ/exec'
+    apiUrl: 'https://script.google.com/macros/s/AKfycbwHeAcOZjRIECbK1txd9inRnnFkEVbW39Rfrpg4qyTMxxdB7gKmroAEABUgzc_8wdXupQ/exec',
+    pageSize: 10, // 10개 단위로 변경
+    pageGroupSize: 5 // 5개 단위로 화살표 처리
   },
 
   async init(containerId) {
@@ -11,7 +13,8 @@ export const CommentsModule = {
 
   async render(page = 1) {
     try {
-      const response = await fetch(`${this.config.apiUrl}?page=${page}`);
+      // pageSize를 쿼리에 포함하여 요청 (서버 로직에 따라 적용)
+      const response = await fetch(`${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}`);
       const result = await response.json(); 
       const comments = result.data || [];
       
@@ -20,6 +23,7 @@ export const CommentsModule = {
         return;
       }
 
+      // 댓글 리스트 렌더링 부분 (기존과 동일)
       this.listContainer.innerHTML = comments.map(c => {
         const date = new Date(c.id);
         const formattedDate = isNaN(date) ? c.id : date.toLocaleString('ko-KR', {
@@ -33,61 +37,99 @@ export const CommentsModule = {
           <div class="comment-footer">
             <span class="comment-date">${formattedDate}</span>
             <div class="btn-group">
-              <button class="edit-btn" onclick="CommentsModule.toggleEditField('${c.id}', '${c.content.replace(/'/g, "\\'")}')">수정</button>
-              <button class="del-btn" onclick="CommentsModule.handleDelete('${c.id}')">삭제</button>
+              <button class="edit-btn" onclick="CommentsModule.openActionField('${c.id}', 'update')">수정</button>
+              <button class="del-btn" onclick="CommentsModule.openActionField('${c.id}', 'delete')">삭제</button>
             </div>
           </div>
-          <!-- ❗ 수정 필드가 펼쳐질 공간 -->
-          <div id="edit-area-${c.id}" class="edit-field-container" style="display:none; margin-top:10px;">
-            <textarea id="edit-input-${c.id}" class="edit-textarea">${c.content}</textarea>
+          <div id="action-area-${c.id}" class="edit-field-container" style="display:none; margin-top:10px;">
+            <div id="edit-content-wrapper-${c.id}">
+                <textarea id="edit-input-${c.id}" class="edit-textarea">${c.content}</textarea>
+            </div>
             <div class="edit-form-bottom">
-              <input type="password" id="edit-pw-${c.id}" placeholder="비밀번호" class="edit-pw-input">
+              <input type="password" id="action-pw-${c.id}" placeholder="비밀번호" class="edit-pw-input">
               <div class="edit-btns">
-                <button onclick="CommentsModule.submitEdit('${c.id}')" class="submit-edit-btn">완료</button>
-                <button onclick="CommentsModule.toggleEditField('${c.id}')" class="cancel-edit-btn">취소</button>
+                <button id="action-submit-${c.id}" class="submit-edit-btn">확인</button>
+                <button onclick="CommentsModule.closeActionField('${c.id}')" class="cancel-edit-btn">취소</button>
               </div>
             </div>
           </div>
         </div>
       `}).join('');
       
-      this.renderPagination(result.total, page, result.pageSize);
+      // 페이지네이션 호출 (수정된 로직)
+      this.renderPagination(result.total, page);
     } catch (e) {
       console.error("로딩 실패:", e);
-      this.listContainer.innerHTML = '<p style="text-align:center; color:red;">데이터 연결 지연 중입니다.</p>';
+      this.listContainer.innerHTML = '<p style="text-align:center; color:red;">데이터를 불러올 수 없습니다.</p>';
     }
   },
 
-  // ❗ 수정 필드 토글 (펼치기/접기)
-  toggleEditField(id, content) {
-    const editArea = document.getElementById(`edit-area-${id}`);
-    const isOpening = editArea.style.display === 'none';
-    
-    // 다른 열려있는 수정창 닫기 (선택사항)
+  renderPagination(total, current) {
+    const totalPages = Math.ceil(total / this.config.pageSize);
+    if (totalPages <= 1) {
+      this.pageContainer.innerHTML = '';
+      return;
+    }
+
+    const groupSize = this.config.pageGroupSize;
+    const currentGroup = Math.ceil(current / groupSize);
+    const startPage = (currentGroup - 1) * groupSize + 1;
+    const endPage = Math.min(currentGroup * groupSize, totalPages);
+
+    let html = '';
+
+    // 이전 그룹 화살표
+    if (currentGroup > 1) {
+      html += `<button class="page-btn arrow" onclick="changePage(${startPage - 1})">&lt;</button>`;
+    }
+
+    // 숫자 페이지
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    }
+
+    // 다음 그룹 화살표
+    if (endPage < totalPages) {
+      html += `<button class="page-btn arrow" onclick="changePage(${endPage + 1})">&gt;</button>`;
+    }
+
+    this.pageContainer.innerHTML = html;
+  },
+
+  // ... (openActionField, closeActionField, submitAction, postComment 등 기존 함수 유지)
+  openActionField(id, action) {
+    const actionArea = document.getElementById(`action-area-${id}`);
+    const contentWrapper = document.getElementById(`edit-content-wrapper-${id}`);
+    const submitBtn = document.getElementById(`action-submit-${id}`);
     document.querySelectorAll('.edit-field-container').forEach(el => el.style.display = 'none');
-    
-    if (isOpening) {
-      editArea.style.display = 'block';
-      if (content) document.getElementById(`edit-input-${id}`).value = content;
+    actionArea.style.display = 'block';
+    if (action === 'delete') {
+      contentWrapper.style.display = 'none';
+      submitBtn.innerText = '삭제 확정';
+      submitBtn.onclick = () => this.submitAction(id, 'delete');
+    } else {
+      contentWrapper.style.display = 'block';
+      submitBtn.innerText = '수정 완료';
+      submitBtn.onclick = () => this.submitAction(id, 'update');
     }
   },
 
-  // ❗ 실제 수정 처리 (비밀번호 검증 필수)
-  async submitEdit(id) {
-    const newContent = document.getElementById(`edit-input-${id}`).value.trim();
-    const password = document.getElementById(`edit-pw-${id}`).value.trim();
+  closeActionField(id) {
+    document.getElementById(`action-area-${id}`).style.display = 'none';
+  },
 
-    if (!newContent) return alert("내용을 입력하세요.");
+  async submitAction(id, action) {
+    const password = document.getElementById(`action-pw-${id}`).value.trim();
+    const content = action === 'update' ? document.getElementById(`edit-input-${id}`).value.trim() : "";
+    if (action === 'update' && !content) return alert("내용을 입력하세요.");
     if (!password) return alert("비밀번호를 입력하세요.");
-
     const res = await fetch(this.config.apiUrl, {
       method: 'POST',
-      body: JSON.stringify({ action: 'update', id, content: newContent, password })
+      body: JSON.stringify({ action, id, content, password })
     });
-
     const result = await res.json();
     if (result.status === 200) {
-      alert("수정되었습니다.");
+      alert(action === 'update' ? "수정되었습니다." : "삭제되었습니다.");
       this.render(1);
     } else {
       alert("비밀번호가 틀렸습니다.");
@@ -100,37 +142,6 @@ export const CommentsModule = {
       body: JSON.stringify({ action: 'create', content, password })
     });
     return await response.json();
-  },
-
-  async handleDelete(id) {
-    const pw = prompt("삭제를 위해 비밀번호를 입력하세요."); // 삭제는 간단하게 prompt 유지하거나 위와 같은 방식으로 통일 가능
-    if (!pw) return;
-
-    const res = await fetch(this.config.apiUrl, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'delete', id, password: pw })
-    });
-
-    const result = await res.json();
-    if (result.status === 200) {
-      alert("삭제되었습니다.");
-      this.render(1); 
-    } else {
-      alert("비밀번호가 틀렸습니다.");
-    }
-  },
-
-  renderPagination(total, current, pageSize) {
-    const totalPages = Math.ceil(total / pageSize);
-    if (totalPages <= 1) {
-      this.pageContainer.innerHTML = '';
-      return;
-    }
-    let html = '';
-    for (let i = 1; i <= totalPages; i++) {
-      html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-    }
-    this.pageContainer.innerHTML = html;
   }
 };
 
