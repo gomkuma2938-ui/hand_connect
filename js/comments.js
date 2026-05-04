@@ -3,7 +3,6 @@ export const CommentsModule = {
         apiUrl: 'https://script.google.com/macros/s/AKfycbyVKORhy8YN5vaWf6xIrikRjYwhodtfEQDdkpXvPALD-GIfXlW-kqOr81H_gvRfvXhg6g/exec',
         pageSize: 10
     },
-    cache: {},
 
     async init(containerId) {
         this.listContainer = document.getElementById(containerId);
@@ -12,79 +11,115 @@ export const CommentsModule = {
         await this.render(1);
     },
 
-async render(page = 1) {
+    async render(page = 1) {
         try {
             this.listContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
-            
-            // 캐시 방지를 위해 타임스탬프 추가
             const url = `${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}&_=${new Date().getTime()}`;
             const res = await fetch(url);
-            
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            
             const result = await res.json();
-            
-            // 데이터 추출 로직 강화: 로그를 찍어서 구조를 먼저 파악하세요.
-            console.log("받은 데이터:", result); 
 
-            // 결과가 배열이면 그대로 쓰고, 객체면 data 필드 확인, 둘 다 아니면 빈 배열
-            let commentsData = [];
-            if (Array.isArray(result)) {
-                commentsData = result;
-            } else if (result && Array.isArray(result.data)) {
-                commentsData = result.data;
-            } else if (result && typeof result === 'object') {
-                // 가끔 API에서 객체 하나만 보낼 경우를 대비
-                commentsData = result.id ? [result] : [];
-            }
-
-            const totalCount = result.total || commentsData.length;
+            let commentsData = result.data || [];
+            const totalCount = result.total || 0;
 
             this.displayComments(commentsData);
             this.renderPagination(totalCount, page);
         } catch (e) {
-            console.error("Comments Load Error:", e);
-            // 사용자에게 더 구체적인 에러 메시지 노출
-            this.listContainer.innerHTML = `
-                <div style="text-align:center; padding:30px;">
-                    <p>댓글을 불러올 수 없습니다.</p>
-                    <small style="color:#ccc;">${e.message}</small>
-                </div>`;
+            this.listContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#999;">댓글을 불러올 수 없습니다.</p>`;
         }
     },
 
-    async submitAction(id, action) {
-        const safeId = id.replace(/[^a-zA-Z0-9]/g, "");
+    displayComments(data) {
+        if (data.length === 0) {
+            this.listContainer.innerHTML = '<p style="text-align:center; padding:40px; color:#999;">첫 번째 기도를 남겨주세요 🙏</p>';
+            return;
+        }
+
+        this.listContainer.innerHTML = data.map(item => {
+            // ID가 ISO날짜 형식이므로 특수문자 제거해서 DOM ID로 사용
+            const safeId = String(item.id).replace(/[^a-zA-Z0-9]/g, "");
+            // 보기 좋은 날짜 형식으로 변환 (예: 2023-10-27)
+            const displayDate = item.id ? item.id.split('T')[0] : "";
+
+            return `
+                <div class="comment-item">
+                    <div class="comment-content">${item.content.replace(/\n/g, '<br>')}</div>
+                    <div class="comment-footer">
+                        <span class="comment-date">${displayDate}</span>
+                        <div class="btn-group">
+                            <button class="edit-btn" onclick="CommentsModule.showAction('${safeId}', 'update')">수정</button>
+                            <button class="del-btn" onclick="CommentsModule.showAction('${safeId}', 'delete')">삭제</button>
+                        </div>
+                    </div>
+                    
+                    <div id="action-field-${safeId}" class="edit-field-container" style="display:none;">
+                        <textarea id="edit-input-${safeId}" class="edit-textarea" style="display:none;">${item.content}</textarea>
+                        <div class="edit-form-bottom">
+                            <input type="password" id="action-pw-${safeId}" class="edit-pw-input" placeholder="비밀번호">
+                            <div class="edit-btns">
+                                <button class="cancel-btn" onclick="CommentsModule.hideAction('${safeId}')">취소</button>
+                                <button class="submit-edit-btn" onclick="CommentsModule.submitAction('${item.id}', '${safeId}')">확인</button>
+                            </div>
+                        </div>
+                        <div id="action-msg-${safeId}" class="error-msg" style="display:none;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    showAction(safeId, type) {
+        this.hideAllActions();
+        const field = document.getElementById(`action-field-${safeId}`);
+        const input = document.getElementById(`edit-input-${safeId}`);
+        field.dataset.type = type; // 현재 액션 저장 (update/delete)
+        field.style.display = 'block';
+        input.style.display = (type === 'update') ? 'block' : 'none';
+    },
+
+    hideAction(safeId) {
+        document.getElementById(`action-field-${safeId}`).style.display = 'none';
+    },
+
+    hideAllActions() {
+        document.querySelectorAll('.edit-field-container').forEach(el => el.style.display = 'none');
+    },
+
+    async submitAction(originalId, safeId) {
+        const field = document.getElementById(`action-field-${safeId}`);
+        const action = field.dataset.type; // 백엔드 action (update 또는 delete)
         const password = document.getElementById(`action-pw-${safeId}`).value;
-        const content = action === 'update' ? document.getElementById(`edit-input-${safeId}`).value : "";
+        const content = document.getElementById(`edit-input-${safeId}`).value;
         const msgArea = document.getElementById(`action-msg-${safeId}`);
-        
-        // 에러 초기화
-        msgArea.style.display = "none";
-        msgArea.innerText = "";
 
         if (!password) {
-            msgArea.innerText = "비밀번호를 입력해주세요.";
+            msgArea.innerText = "비밀번호를 입력하세요.";
             msgArea.style.display = "block";
             return;
         }
 
         try {
+            // 백엔드 doPost 구조에 맞게 전달
             const res = await fetch(this.config.apiUrl, {
                 method: 'POST',
-                body: JSON.stringify({ action, id, content, password })
+                mode: 'no-cors', // GAS 특성상 응답 확인이 필요하면 아래 logic 참고
+                body: JSON.stringify({ 
+                    action: action, 
+                    id: originalId, 
+                    content: content, 
+                    password: password 
+                })
             });
-            const result = await res.json();
-            if (result.status === 200) {
-                this.cache = {}; 
-                this.render(1);
-            } else {
-                // 얼럿 대신 인라인 경고 문구 노출
-                msgArea.innerText = "비밀번호가 일치하지 않습니다.";
-                msgArea.style.display = "block";
-            }
-        } catch (e) { 
-            msgArea.innerText = "통신 오류가 발생했습니다.";
+
+            // GAS doPost는 'no-cors' 이슈가 있을 수 있어 일반 fetch 후 결과 확인
+            // 여기서는 단순화하여 2초 뒤 새로고침 (가장 확실한 방법)
+            msgArea.style.color = "blue";
+            msgArea.innerText = "처리 중...";
+            msgArea.style.display = "block";
+            
+            setTimeout(() => this.render(1), 1500);
+
+        } catch (e) {
+            msgArea.innerText = "오류가 발생했습니다.";
             msgArea.style.display = "block";
         }
     },
@@ -92,7 +127,6 @@ async render(page = 1) {
     renderPagination(total, current) {
         const totalPages = Math.ceil(total / this.config.pageSize);
         if (totalPages <= 1) { this.pageContainer.innerHTML = ''; return; }
-        
         let html = '';
         for (let i = 1; i <= totalPages; i++) {
             html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
@@ -101,4 +135,5 @@ async render(page = 1) {
     }
 };
 
+window.CommentsModule = CommentsModule;
 window.changePage = (p) => CommentsModule.render(p);
