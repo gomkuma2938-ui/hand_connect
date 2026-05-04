@@ -71,7 +71,7 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     position: fixed; 
     top: 5px; 
     right: 15px; 
-    font-size: 55px; /* 크기를 더 키워서 잘 보이게 함 */
+    font-size: 35px; /* 크기를 더 키워서 잘 보이게 함 */
     color: #fff;
     z-index: 9000;
     cursor: pointer;
