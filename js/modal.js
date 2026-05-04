@@ -63,16 +63,16 @@ export const ModalModule = {
         e.preventDefault();
         lastTX = e.touches[0].clientX - startX;
         lastTY = e.touches[0].clientY - startY;
+      
+        // 이동 범위 제한
+        const imgW = img.naturalWidth || img.offsetWidth;
+        const imgH = img.naturalHeight || img.offsetHeight;
+        const maxX = (img.offsetWidth * (this.scale - 1)) / 2;
+        const maxY = (img.offsetHeight * (this.scale - 1)) / 2;
+        lastTX = Math.min(maxX, Math.max(-maxX, lastTX));
+        lastTY = Math.min(maxY, Math.max(-maxY, lastTY));
+      
         img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
-      }
-    }, { passive: false });
-
-    img.addEventListener('touchend', (e) => {
-      if (this.scale <= 1) {
-        this.scale = 1;
-        lastTX = 0;
-        lastTY = 0;
-        img.style.transform = '';
       }
     });
   },
