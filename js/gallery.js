@@ -24,12 +24,28 @@ export const GalleryModule = {
       visibleImages.push(`img/${num}.jpg`);
       return `
         <div class="grid-item ${isBig ? 'big' : ''}">
-          <img src="img/${num}.jpg" 
-               onerror="this.style.display='none'; this.parentElement.style.background='#eee';" 
-               onclick="window.openModal('img/${num}.jpg')">
+          <img data-src="img/${num}.jpg"
+               src=""
+               onerror="this.style.display='none'; this.parentElement.style.background='#eee';"
+               onclick="window.openModal('img/${num}.jpg')"
+               class="lazy">
         </div>
       `;
     }).join('');
+
+    // 레이지 로딩
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' });
+
+    container.querySelectorAll('img.lazy').forEach(img => observer.observe(img));
+
     window.openModal = (src) => ModalModule.open(src);
     ModalModule.setImageList(visibleImages);
   }
