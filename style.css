@@ -3,19 +3,20 @@
   --main-color: #333;
   --bg-color: #fafafa;
   --border-color: #dbdbdb;
+  --navy-color: #1a237e; /* 남색 테마 추가 */
+  --navy-hover: #0d47a1;
 }
 
-/* 구글 폰트에서 Noto Sans KR 불러오기 */
+/* 구글 폰트 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
 body {
-  font-family: 'Noto Sans KR', sans-serif; /* 전체 폰트 변경 */
+  font-family: 'Noto Sans KR', sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f9f9f9;
   color: #333;
 }
-
 
 /* 1. 헤더 & 감성 문구 */
 header { background: #fff; text-align: center; border-bottom: 1px solid var(--border-color); }
@@ -23,26 +24,21 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 .intro-text h2 { margin: 0 0 10px; font-size: 1.2rem; font-weight: 600; }
 .intro-text p { margin: 0; font-size: 0.9rem; color: #666; word-break: keep-all; }
 
-/* 2. 이미지 그리드 (Instagram 스타일) */
+/* 2. 이미지 그리드 */
 #gallery-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr; /* 정사각 유지 */
+  grid-auto-rows: 1fr;
   gap: var(--gap);
   padding: var(--gap);
   background: #fff;
 }
-
 .grid-item { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #eee; }
 .grid-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
 .grid-item img:active { opacity: 0.8; }
+.grid-item.big { grid-column: span 2; grid-row: span 2; }
 
-.grid-item.big {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-/* 3. 모달 (확대 보기) */
+/* 3. 모달 */
 .modal {
   display: none; position: fixed; z-index: 2000;
   left: 0; top: 0; width: 100%; height: 100%;
@@ -56,62 +52,74 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
   font-size: 35px; color: white; z-index: 2100; cursor: pointer; padding: 10px;
 }
 
+/* 4. 댓글 섹션 (수정 및 레이아웃 최적화) */
 #comment-section {
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* 1. 댓글 입력란 프레임 최적화 */
 .comment-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 100%; /* 부모 너비에 맞춤 */
-    box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
-    padding: 15px;
+    width: 100%; 
+    box-sizing: border-box; /* 패딩 포함 너비 계산하여 프레임 이탈 방지 */
+    padding: 15px 0; /* 좌우 패딩 제거하여 라인 맞춤 */
 }
 
 #comment-input, #pw-input {
-    width: 100%; /* 프레임 범위를 벗어나지 않게 고정 */
-    box-sizing: border-box;
-    padding: 10px;
+    width: 100%; 
+    box-sizing: border-box; /* 입력란이 부모 밖으로 나가지 않도록 고정 */
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    font-family: inherit;
 }
 
-/* 2. 버튼 디자인 통일 (남색 계열) */
-#submit-btn, .del-btn {
-    background-color: #1a237e; /* 남색 */
+/* 버튼 디자인 통일 (남색 계열) */
+#submit-btn, .edit-btn, .del-btn {
+    background-color: var(--navy-color);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
+    font-family: inherit;
 }
 
 #submit-btn {
-    padding: 12px;
-    font-weight: bold;
+    padding: 14px;
+    font-weight: 700;
     width: 100%;
+    margin-top: 5px;
 }
 
-.del-btn {
-    padding: 4px 10px;
-    font-size: 0.75rem;
+.edit-btn, .del-btn {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    margin-left: 4px;
 }
 
-#submit-btn:hover, .del-btn:hover {
-    background-color: #0d47a1; /* 호버 시 약간 밝은 남색 */
+/* 수정 버튼은 약간 다른 톤으로 구분 (선택사항) */
+.edit-btn { background-color: #283593; }
+
+#submit-btn:hover, .edit-btn:hover, .del-btn:hover {
+    background-color: var(--navy-hover);
 }
 
-/* 3. 댓글 아이템 간격 및 선 정리 */
 .comment-item {
     border-bottom: 1px solid #f0f0f0;
-    padding: 15px 0;
+    padding: 18px 0;
 }
 
-/* 경고 문구 위치: 비번 필드보다 더 아래로 설정 */
+.comment-content {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+/* 경고 문구 */
 #error-message {
   color: #ff4d4d;
   font-size: 13px;
@@ -125,5 +133,4 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
   gap: 15px; margin-top: 25px; padding-bottom: 40px;
 }
 .page-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 0.9rem; }
-.page-btn.active { color: #0095f6; font-weight: bold; text-decoration: underline; }
-.page-arrow { font-weight: bold; color: var(--main-color); }
+.page-btn.active { color: var(--navy-color); font-weight: bold; text-decoration: underline; }
