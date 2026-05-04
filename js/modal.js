@@ -40,7 +40,7 @@ export const ModalModule = {
                 if (this.pz) {
                     this.pz.destroy();
                 }
-                this.pz = new TargetLib(this.zoomElement, {
+                this.pz = new TargetLib.default(this.zoomElement, {
                     draggableUnzoomed: false,
                     minZoom: 1,
                     maxZoom: 4,
