@@ -17,20 +17,25 @@
   </header>
 
   <main id="gallery-container"></main>
-
-  <section id="comment-section">
-    <div id="comment-form">
-      <textarea id="comment-input" placeholder="따뜻한 한마디를 남겨주세요."></textarea>
-      <div id="error-message"></div>
-      <div class="form-bottom">
-        <input type="password" id="pw-input" placeholder="비밀번호(4자 이상)">
-        <!-- 아래 버튼 코드에 onclick="submitComment()"가 반드시 포함되어야 합니다 -->
-        <button id="submit-btn" onclick="submitComment()">등록</button>
+  
+    <section id="comment-section">
+      <div id="comment-form">
+        <!-- 내용 입력 필드 -->
+        <textarea id="comment-input" placeholder="따뜻한 한마디를 남겨주세요."></textarea>
+        
+        <!-- 비번 필드와 등록 버튼 -->
+        <div class="form-bottom">
+          <input type="password" id="pw-input" placeholder="비밀번호(4자 이상)">
+          <button id="submit-btn" onclick="submitComment()">등록</button>
+        </div>
+  
+        <!-- ❗ 에러 문구를 가장 하단으로 이동 -->
+        <div id="error-message"></div>
       </div>
-    </div>
-    <div id="comment-list"></div>
-    <div id="pagination"></div>
-  </section>
+  
+      <div id="comment-list"></div>
+      <div id="pagination"></div>
+    </section>
 
   <div id="image-modal" class="modal">
     <span class="close-btn">&times;</span>
