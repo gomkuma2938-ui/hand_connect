@@ -15,61 +15,42 @@ export const CommentsModule = {
 async render(page = 1) {
         try {
             this.listContainer.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
-            const res = await fetch(`${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}`);
+            
+            // 캐시 방지를 위해 타임스탬프 추가
+            const url = `${this.config.apiUrl}?page=${page}&pageSize=${this.config.pageSize}&_=${new Date().getTime()}`;
+            const res = await fetch(url);
+            
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            
             const result = await res.json();
-            const commentsData = Array.isArray(result) ? result : (result.data || []);
+            
+            // 데이터 추출 로직 강화: 로그를 찍어서 구조를 먼저 파악하세요.
+            console.log("받은 데이터:", result); 
+
+            // 결과가 배열이면 그대로 쓰고, 객체면 data 필드 확인, 둘 다 아니면 빈 배열
+            let commentsData = [];
+            if (Array.isArray(result)) {
+                commentsData = result;
+            } else if (result && Array.isArray(result.data)) {
+                commentsData = result.data;
+            } else if (result && typeof result === 'object') {
+                // 가끔 API에서 객체 하나만 보낼 경우를 대비
+                commentsData = result.id ? [result] : [];
+            }
+
             const totalCount = result.total || commentsData.length;
 
             this.displayComments(commentsData);
             this.renderPagination(totalCount, page);
         } catch (e) {
             console.error("Comments Load Error:", e);
-            this.listContainer.innerHTML = '<p style="text-align:center; padding:30px;">댓글을 불러올 수 없습니다.</p>';
+            // 사용자에게 더 구체적인 에러 메시지 노출
+            this.listContainer.innerHTML = `
+                <div style="text-align:center; padding:30px;">
+                    <p>댓글을 불러올 수 없습니다.</p>
+                    <small style="color:#ccc;">${e.message}</small>
+                </div>`;
         }
-    },
-
-    displayComments(comments) {
-        // 1. 소제목 위치 및 중앙 정렬 스타일 적용
-        let html = `<h3 class="comments-title" style="text-align: center; margin-bottom: 20px;">기도 동참하기🙏</h3>`;
-
-        if (!comments || comments.length === 0) {
-            this.listContainer.innerHTML = html + '<p style="text-align:center; padding:30px; color:#999;">첫 댓글을 남겨주세요.</p>';
-            return;
-        }
-
-        html += comments.map(c => {
-            const idStr = String(c.id);
-            const safeId = idStr.replace(/[^a-zA-Z0-9]/g, "");
-            // 2. 실제 등록일시(timestamp) 출력
-            const displayDate = c.timestamp || '방금 전'; 
-
-            return `
-                <div class="comment-item">
-                    <div class="comment-content">${c.content}</div>
-                    <div class="comment-footer">
-                        <span class="comment-date">${displayDate}</span>
-                        <div class="btn-group">
-                            <button class="edit-btn" data-id="${idStr}" data-action="update">수정</button>
-                            <button class="del-btn" data-id="${idStr}" data-action="delete">삭제</button>
-                        </div>
-                    </div>
-                    <div id="action-area-${safeId}" class="edit-field-container" style="display:none;">
-                        <textarea id="edit-input-${safeId}" class="edit-textarea">${c.content}</textarea>
-                        <div class="edit-form-bottom">
-                            <input type="password" id="action-pw-${safeId}" placeholder="비밀번호" class="edit-pw-input">
-                            <div class="edit-btns">
-                                <button id="action-submit-${safeId}" class="submit-edit-btn">확인</button>
-                                <button class="cancel-btn" data-id="${idStr}">취소</button>
-                            </div>
-                        </div>
-                        <!-- 7. 얼럿 대신 아래에 띄울 경고 문구 영역 (CSS 규격에 맞게 display 제어) -->
-                        <div id="action-msg-${safeId}" class="error-msg" style="display:none; font-size:11px; color:red; margin-top:5px; text-align:center;"></div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        this.listContainer.innerHTML = html;
-        this.bindEvents();
     },
 
     async submitAction(id, action) {
