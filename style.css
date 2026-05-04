@@ -60,7 +60,7 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 
 #comment-input {
     width: 100%; box-sizing: border-box; padding: 12px;
-    border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; font-family: inherit;
+    border: 1px solid #ddd; border-radius: 4px; font-family: inherit;
 }
 
 /* 비밀번호 입력창: 한 줄 배치를 위해 margin 제거 및 flex 설정 */
@@ -106,7 +106,6 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 .comment-date { font-size: 0.75rem; color: #bbb; }
 .btn-group { display: flex; gap: 5px; }
 
-.edit-field-container { background: #f8f8f8; border: 1px solid #eee; padding: 12px; border-radius: 4px; margin-top: 10px; }
 .edit-textarea { width: 100%; height: 70px; padding: 10px; box-sizing: border-box; margin-bottom: 8px; resize: none; }
 .edit-form-bottom { display: flex; justify-content: space-between; align-items: center; }
 .edit-pw-input { 
@@ -121,29 +120,43 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 
 /* 7. 인라인 수정/삭제 필드 디자인 수정 */
 .edit-field-container { 
-    background: #ffffff; /* 회색에서 흰색으로 변경 */
-    border: 1px solid var(--navy-color); /* 구분 잘 되게 테두리를 남색으로 변경 */
-    padding: 12px; 
+    background: #ffffff; 
+    border: 1px solid #eee; /* 진한 남색 빼고 아주 연한 회색으로 변경 */
+    padding: 15px; 
     border-radius: 4px; 
-    margin-top: 10px; 
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* 약간의 그림자만 추가 */
 }
 
-/* 페이지네이션 버튼 스타일 수정 */
-.page-btn { 
-    background: none; 
-    border: 1px solid #ddd; 
-    padding: 5px 10px; 
-    color: #999; 
-    cursor: pointer; 
-    font-size: 0.9rem; 
-    border-radius: 4px;
+/* 8. 페이지네이션 - 박스 제거 및 가운데 정렬 */
+#pagination { 
+    display: flex; 
+    justify-content: center; /* 가운데 정렬 */
+    align-items: center;
+    gap: 20px; /* 숫자 사이 간격 */
+    margin-top: 30px; 
+    padding-bottom: 50px;
 }
-/* 현재 페이지만 굵게 + 남색 표시 */
+
+.page-btn { 
+    background: none !important; 
+    border: none !important; /* 박스/테두리 완전 제거 */
+    padding: 5px; 
+    color: #ccc; /* 기본 숫자는 흐리게 */
+    cursor: pointer; 
+    font-size: 1rem; 
+    font-family: inherit;
+    transition: color 0.2s;
+}
+
+/* 현재 페이지만 남색 + 굵게 */
 .page-btn.active { 
-    color: var(--navy-color); 
-    font-weight: bold; 
-    border: 1px solid var(--navy-color); 
-    text-decoration: none; 
+    color: var(--navy-color) !important; 
+    font-weight: bold !important; 
+}
+
+.page-btn:hover {
+    color: var(--main-color);
 }
 
 /* 로더 */
