@@ -31,12 +31,22 @@ export const CommentsModule = {
         }
         this.listContainer.innerHTML = data.map(item => {
             const safeId = String(item.id).replace(/[^a-zA-Z0-9]/g, "");
-            const date = item.id ? item.id.split('T')[0] : "";
+            
+            // ❗ 날짜 포맷팅: YY.MM.DD 형식 (26.05.04)
+            let displayDate = "";
+            if (item.id) {
+                const dateObj = new Date(item.id);
+                const yy = String(dateObj.getFullYear()).slice(-2);
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                displayDate = `${yy}.${mm}.${dd}`;
+            }
+
             return `
                 <div class="comment-item">
                     <div class="comment-content">${item.content.replace(/\n/g, '<br>')}</div>
                     <div class="comment-footer">
-                        <span class="comment-date">${date}</span>
+                        <span class="comment-date">${displayDate}</span>
                         <div class="btn-group">
                             <button class="edit-btn" onclick="CommentsModule.toggleField('${safeId}', 'update')">수정</button>
                             <button class="del-btn" onclick="CommentsModule.toggleField('${safeId}', 'delete')">삭제</button>
@@ -84,15 +94,36 @@ export const CommentsModule = {
         } catch (e) { msg.innerText = "오류 발생"; msg.style.display = "block"; }
     },
 
+    // ❗ 5단위 페이지네이션 로직 수정
     renderPagination(total, current) {
         const totalPages = Math.ceil(total / this.config.pageSize);
         if (totalPages <= 1) { this.pageContainer.innerHTML = ''; return; }
+        
+        const pageGroup = 5; // 5개 단위
+        const currentGroup = Math.ceil(current / pageGroup);
+        const startPage = (currentGroup - 1) * pageGroup + 1;
+        const endPage = Math.min(startPage + pageGroup - 1, totalPages);
+        
         let html = '';
-        for (let i = 1; i <= totalPages; i++) {
+        
+        // 이전 그룹 버튼
+        if (startPage > 1) {
+            html += `<button class="page-btn" onclick="changePage(${startPage - 1})"><</button>`;
+        }
+        
+        // 숫자 버튼
+        for (let i = startPage; i <= endPage; i++) {
             html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
         }
+        
+        // 다음 그룹 버튼
+        if (endPage < totalPages) {
+            html += `<button class="page-btn" onclick="changePage(${endPage + 1})">></button>`;
+        }
+        
         this.pageContainer.innerHTML = html;
     }
 };
+
 window.CommentsModule = CommentsModule;
 window.changePage = (p) => CommentsModule.render(p);
