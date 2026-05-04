@@ -14,6 +14,7 @@ const app = {
     // 2. 모달 기능 활성화
     try {
       ModalModule.init();
+      window.ModalModule = ModalModule;
     } catch (e) {
       console.error("모달 초기화 실패:", e);
     }
