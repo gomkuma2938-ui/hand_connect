@@ -87,14 +87,12 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #fff;
-    font-size: 28px;
-    font-weight: 100;
     cursor: pointer;
     z-index: 9000;
     padding: 20px;
-    text-shadow: none;
-    opacity: 0.7;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0px 0px 6px rgba(0,0,0,0.8));
 }
 .prev-btn { left: 5px; }
 .next-btn { right: 5px; }
