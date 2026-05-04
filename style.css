@@ -92,6 +92,8 @@ header {
     margin-bottom: 10px;
 }
 
+#pw-input { flex: 1; }
+
 /* 5. 버튼 시스템 */
 /* 메인 강조 버튼 (제출, 삭제, 확인) */
 #submit-btn, .del-btn, .submit-edit-btn {
@@ -103,7 +105,17 @@ header {
     cursor: pointer;
     box-sizing: border-box; /* 크기 계산 고정 */
 }
-#submit-btn { width: 100%; padding: 14px; }
+#submit-btn {
+    height: 45px; /* 25px에서 45px로 변경 */
+    width: 100%;
+    margin-top: 5px;
+    flex: 1;
+    margin-top: 0;
+}
+.form-bottom {
+    display: flex;
+    gap: 10px;
+}
 .del-btn { padding: 4px 10px; font-size: 0.75rem; }
 .submit-edit-btn { padding: 8px 15px; font-size: 0.8rem; }
 
@@ -234,7 +246,7 @@ header {
 }
 
 /* 5. 버튼 크기 통일 (25px 고정) */
-.submit-edit-btn, .cancel-btn, #submit-btn {
+.submit-edit-btn, .cancel-btn {
     height: 25px !important;
     padding: 0 12px !important;
     font-size: 0.75rem !important;
