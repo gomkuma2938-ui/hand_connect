@@ -45,7 +45,7 @@ export const CommentsModule = {
                     <div id="field-${safeId}" class="edit-field-container" style="display:none;">
                         <textarea id="area-${safeId}" class="edit-textarea" style="display:none;">${item.content}</textarea>
                         <div class="edit-form-bottom">
-                            <input type="password" id="pw-${safeId}" class="edit-pw-input" placeholder="비번">
+                            <input type="password" id="pw-${safeId}" class="edit-pw-input" placeholder="비밀번호(4자 이상)">
                             <div class="edit-btns">
                                 <button class="cancel-btn" onclick="CommentsModule.toggleField('${safeId}')">취소</button>
                                 <button class="submit-edit-btn" onclick="CommentsModule.submitAction('${item.id}', '${safeId}')">확인</button>
