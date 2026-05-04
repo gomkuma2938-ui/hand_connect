@@ -35,5 +35,6 @@ export const GalleryModule = {
     }).join('');
 
     window.openModal = (src) => ModalModule.open(src);
+    ModalModule.setImageList(images.map(num => `img/${num}.jpg`));
   }
 };
