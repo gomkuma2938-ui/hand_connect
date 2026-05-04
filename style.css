@@ -62,43 +62,53 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
   margin: 0 auto;
 }
 
-#comment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* 필드 사이 간격을 8px로 좁힘 */
-  margin-bottom: 20px;
+/* 1. 댓글 입력란 프레임 최적화 */
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%; /* 부모 너비에 맞춤 */
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+    padding: 15px;
 }
 
-#comment-input {
-  width: 100%;
-  height: 80px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  resize: none;
-  font-family: 'Noto Sans KR', sans-serif;
+#comment-input, #pw-input {
+    width: 100%; /* 프레임 범위를 벗어나지 않게 고정 */
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-.form-bottom {
-  display: flex;
-  gap: 8px;
-}
-
-#pw-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: 'Noto Sans KR', sans-serif;
+/* 2. 버튼 디자인 통일 (남색 계열) */
+#submit-btn, .del-btn {
+    background-color: #1a237e; /* 남색 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 #submit-btn {
-  padding: 10px 20px;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+    padding: 12px;
+    font-weight: bold;
+    width: 100%;
+}
+
+.del-btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+}
+
+#submit-btn:hover, .del-btn:hover {
+    background-color: #0d47a1; /* 호버 시 약간 밝은 남색 */
+}
+
+/* 3. 댓글 아이템 간격 및 선 정리 */
+.comment-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 15px 0;
 }
 
 /* 경고 문구 위치: 비번 필드보다 더 아래로 설정 */
