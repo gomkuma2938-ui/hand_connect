@@ -260,3 +260,19 @@ header { background: #fff; text-align: center; border-bottom: 1px solid var(--bo
 .spinner-container { display: flex; justify-content: center; padding: 50px 0; }
 .spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid var(--navy-color); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.prev-btn, .next-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 9000;
+  padding: 20px;
+  text-shadow: 0px 0px 10px rgba(0,0,0,1);
+}
+.prev-btn { left: 5px; }
+.next-btn { right: 5px; }
