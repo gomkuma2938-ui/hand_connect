@@ -38,28 +38,40 @@ export const ModalModule = {
   },
 
   navigate(dir) {
-    this.currentIndex = (this.currentIndex + dir + this.imageList.length) % this.imageList.length;
-    const nextSrc = this.imageList[this.currentIndex];
+    const nextIndex = (this.currentIndex + dir + this.imageList.length) % this.imageList.length;
+    const nextSrc = this.imageList[nextIndex];
   
-    // 슬라이딩 애니메이션
-    const img = this.modalImg;
-    const slideOut = dir > 0 ? '-100%' : '100%';
-    const slideIn = dir > 0 ? '100%' : '-100%';
+    const current = this.modalImg;
+    const next = document.createElement('img');
+    next.src = nextSrc;
+    next.style.cssText = `
+      position: absolute;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transform: translateX(${dir > 0 ? '100%' : '-100%'});
+      transition: transform 0.3s ease;
+    `;
   
-    img.style.transition = 'transform 0.3s ease';
-    img.style.transform = `translateX(${slideOut})`;
+    this.zoomElement.appendChild(next);
+    current.style.transition = 'transform 0.3s ease';
+  
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        next.style.transform = 'translateX(0)';
+        current.style.transform = `translateX(${dir > 0 ? '-100%' : '100%'})`;
+      });
+    });
   
     setTimeout(() => {
-      img.src = nextSrc;
-      img.style.transition = 'none';
-      img.style.transform = `translateX(${slideIn})`;
-      setTimeout(() => {
-        img.style.transition = 'transform 0.3s ease';
-        img.style.transform = 'translateX(0)';
-        this.scale = 1;
-        this.lastTX = 0;
-        this.lastTY = 0;
-      }, 20);
+      this.zoomElement.removeChild(current);
+      next.id = 'modal-img';
+      this.modalImg = next;
+      this._initTouch();
+      this.currentIndex = nextIndex;
+      this.scale = 1;
+      this.lastTX = 0;
+      this.lastTY = 0;
     }, 300);
   },
 
