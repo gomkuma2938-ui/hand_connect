@@ -3,12 +3,12 @@ import { ModalModule } from './modal.js';
 import { CommentsModule } from './comments.js';
 
 const app = {
-  // 1. 초기화 설정
+  // 1. 초기화 설정 (여기서 갤러리를 다시 살려냅니다)
   async init() {
-    // 갤러리 이미지 로드
+    // 갤러리 이미지 로드 (76장) - 이 부분이 누락되었을 겁니다.
     GalleryModule.init('gallery-container', 76);
 
-    // 댓글 리스트 로드 (모달 에러가 나도 실행되도록 try-catch 처리)
+    // 댓글 리스트 로드
     try {
       await CommentsModule.init('comment-list');
     } catch (e) {
@@ -23,7 +23,7 @@ const app = {
     }
   },
 
-  // 2. 댓글 등록 로직 (app 객체 안으로 통합)
+  // 2. 댓글 등록 로직
   async handleCommentSubmit() {
     const contentEl = document.getElementById('comment-input');
     const passwordEl = document.getElementById('pw-input');
@@ -35,7 +35,6 @@ const app = {
     const content = contentEl.value.trim();
     const password = passwordEl.value.trim();
 
-    // 유효성 검사
     if (!content) {
       errorMsg.textContent = "내용을 입력해주세요.";
       contentEl.focus();
@@ -47,19 +46,15 @@ const app = {
       return;
     }
 
-    // 상태 변경
     btn.disabled = true;
     btn.innerText = "등록 중...";
-    errorMsg.textContent = "";
 
     try {
       const result = await CommentsModule.postComment(content, password);
-      
       if (result.status === 200) {
         contentEl.value = '';
         passwordEl.value = '';
         alert("댓글이 등록되었습니다.");
-        // 등록 성공 후 목록 즉시 갱신
         await CommentsModule.render(1); 
       } else {
         errorMsg.textContent = "등록 실패 (서버 응답 오류)";
@@ -74,6 +69,6 @@ const app = {
   }
 };
 
-// 3. 전역 함수 연결 및 초기화 실행
+// 전역 함수 연결 및 초기화 실행
 window.submitComment = () => app.handleCommentSubmit();
 document.addEventListener('DOMContentLoaded', () => app.init());
