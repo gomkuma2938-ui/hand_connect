@@ -101,7 +101,7 @@ header {
     border-radius: 4px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s;
+    box-sizing: border-box; /* 크기 계산 고정 */
 }
 #submit-btn { width: 100%; padding: 14px; }
 .del-btn { padding: 4px 10px; font-size: 0.75rem; }
@@ -109,6 +109,22 @@ header {
 
 #submit-btn:hover, .del-btn:hover, .submit-edit-btn:hover {
     background-color: var(--navy-hover);
+}
+
+/* 3. 삭제/확인 버튼 호버 시 색상 변화 제거 (디자인 의도 반영) */
+.del-btn:hover, .submit-edit-btn:hover {
+    background-color: var(--navy-color) !important; /* 색상 유지 */
+    opacity: 0.9; /* 미세한 클릭감만 부여 */
+}
+
+/* 5. 인라인 필드 버튼 크기를 댓글 버튼(edit-btn, del-btn)과 동일하게 28px(수준)로 맞춤 */
+.submit-edit-btn, .cancel-btn {
+    height: 25px !important; /* del-btn과 시각적 높이 통일 */
+    padding: 0 10px !important;
+    font-size: 0.75rem !important;
+    line-height: 25px;
+    display: inline-flex;
+    align-items: center;
 }
 
 /* 서브 버튼 (수정, 취소) - 회색 톤 */
@@ -125,6 +141,14 @@ header {
 
 .edit-btn:hover, .cancel-btn:hover {
     background-color: var(--gray-btn-hover) !important;
+}
+
+/* 6. 댓글 등록/수정 시 경고 문구 스타일 */
+.error-msg {
+    color: #e74c3c !important; /* 선명한 빨간색 */
+    font-size: 11px !important; /* 작고 깔끔하게 */
+    margin-top: 4px;
+    font-weight: 400;
 }
 
 /* 6. 개별 댓글 아이템 */
