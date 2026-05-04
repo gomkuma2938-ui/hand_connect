@@ -6,6 +6,9 @@
     --border-color: #dbdbdb;
     --navy-color: #1a237e;
     --navy-hover: #0d47a1;
+    --gray-btn: #f0f0f0;
+    --gray-btn-hover: #e0e0e0;
+    --gray-text: #666;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
@@ -15,7 +18,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f9f9f9;
-    color: #333;
+    color: var(--main-color);
     line-height: 1.6;
 }
 
@@ -64,6 +67,14 @@ header {
     margin: 0 auto;
 }
 
+.comments-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--main-color);
+    padding-left: 5px;
+}
+
 .comment-form {
     display: flex;
     flex-direction: column;
@@ -81,68 +92,64 @@ header {
     margin-bottom: 10px;
 }
 
-#submit-btn {
+/* 5. 버튼 시스템 */
+/* 메인 강조 버튼 (제출, 삭제, 확인) */
+#submit-btn, .del-btn, .submit-edit-btn {
     background-color: var(--navy-color);
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 14px;
     font-weight: 700;
     cursor: pointer;
-    width: 100%;
+    transition: background 0.2s;
+}
+#submit-btn { width: 100%; padding: 14px; }
+.del-btn { padding: 4px 10px; font-size: 0.75rem; }
+.submit-edit-btn { padding: 8px 15px; font-size: 0.8rem; }
+
+#submit-btn:hover, .del-btn:hover, .submit-edit-btn:hover {
+    background-color: var(--navy-hover);
 }
 
-/* 5. 개별 댓글 아이템 */
+/* 서브 버튼 (수정, 취소) - 회색 톤 */
+.edit-btn, .cancel-btn {
+    background-color: var(--gray-btn) !important;
+    color: var(--gray-text) !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.edit-btn { padding: 4px 10px; font-size: 0.75rem; }
+.cancel-btn { padding: 8px 15px; font-size: 0.8rem; } /* 인라인 필드용 */
+
+.edit-btn:hover, .cancel-btn:hover {
+    background-color: var(--gray-btn-hover) !important;
+}
+
+/* 6. 개별 댓글 아이템 */
 .comment-item {
     border-bottom: 1px solid #eee;
     padding: 15px 0;
 }
-
 .comment-content {
     margin-bottom: 6px;
     font-size: 0.95rem;
     line-height: 1.5;
     word-break: break-all;
 }
-
 .comment-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
 .comment-date {
     font-size: 0.75rem;
     color: #bbb;
 }
-
-/* 버튼 그룹 및 개별 버튼 */
 .btn-group { display: flex; gap: 5px; }
 
-.edit-btn {
-    background-color: #f0f0f0 !important;
-    color: #888 !important;
-    border: 1px solid #ddd !important;
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.del-btn {
-    background-color: var(--navy-color);
-    color: white;
-    border: none;
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.edit-btn:hover { background-color: #e5e5e5 !important; }
-.del-btn:hover, #submit-btn:hover { background-color: var(--navy-hover); }
-
-/* 6. 인라인 수정/삭제 필드 디자인 */
+/* 7. 인라인 수정/삭제 필드 디자인 */
 .edit-field-container {
     background: #f8f8f8;
     border: 1px solid #eee;
@@ -150,7 +157,6 @@ header {
     border-radius: 4px;
     margin-top: 10px;
 }
-
 .edit-textarea {
     width: 100%;
     height: 70px;
@@ -162,13 +168,11 @@ header {
     font-family: inherit;
     resize: none;
 }
-
 .edit-form-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
 .edit-pw-input {
     width: 100px;
     padding: 8px;
@@ -176,30 +180,9 @@ header {
     border-radius: 4px;
     font-size: 0.8rem;
 }
-
 .edit-btns { display: flex; gap: 6px; }
 
-.submit-edit-btn {
-    background: var(--navy-color);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.cancel-edit-btn {
-    background: #fff;
-    color: #888;
-    border: 1px solid #ccc;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-/* 7. 기타 (페이지네이션 등) */
+/* 8. 기타 (페이지네이션 및 로더) */
 #pagination { 
     display: flex; justify-content: center; gap: 15px; 
     margin-top: 25px; padding-bottom: 40px;
@@ -207,43 +190,15 @@ header {
 .page-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 0.9rem; }
 .page-btn.active { color: var(--navy-color); font-weight: bold; text-decoration: underline; }
 
-#error-message { color: #ff4d4d; font-size: 13px; margin-top: 4px; }
-
-/* 로딩 스피너 */
-.spinner-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 50px 0;
-}
-
+.spinner-container { display: flex; justify-content: center; align-items: center; padding: 50px 0; }
 .spinner {
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border: 3px solid #f3f3f3;
     border-top: 3px solid var(--navy-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-/* 수정 버튼과 취소 버튼 공통 회색 스타일 */
-.edit-btn, .cancel-btn {
-    background-color: #f0f0f0; /* 연한 회색 */
-    color: #666;
-    border: 1px solid #ddd;
-    /* 기존 디자이너님의 버튼 스타일 속성 유지 */
-}
-
-.edit-btn:hover, .cancel-btn:hover {
-    background-color: #e0e0e0;
-}
-
-/* 삭제 버튼 스타일 (필요시) */
-.del-btn, .submit-edit-btn {
-    /* 삭제나 확인 버튼은 기존 포인트 컬러 유지 */
 }
