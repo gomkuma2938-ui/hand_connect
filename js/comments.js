@@ -36,7 +36,7 @@ export const CommentsModule = {
   },
 
   displayComments(comments) {
-    // 1. 상단 제목 추가 (디자인에 맞춰 스타일 조절 가능)
+    // 소제목 중앙 정렬 배치
     const titleHtml = `<h3 class="comments-title">기도 동참하기🙏</h3>`;
 
     if (!comments || comments.length === 0) {
@@ -76,7 +76,6 @@ export const CommentsModule = {
 
     this.listContainer.innerHTML = titleHtml + listHtml;
 
-    // 이벤트 리스너 바인딩
     this.listContainer.querySelectorAll('.edit-btn, .del-btn').forEach(btn => {
       btn.onclick = () => this.openActionField(btn.dataset.id, btn.dataset.action);
     });
