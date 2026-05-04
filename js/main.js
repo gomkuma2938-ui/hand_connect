@@ -27,74 +27,55 @@ const app = {
       }
     },
   
-    async handleCommentSubmit() {
-      const contentEl = document.getElementById('comment-input');
-      const passwordEl = document.getElementById('pw-input');
-      const errorMsg = document.getElementById('error-message');
-      const btn = document.getElementById('submit-btn');
-  
-      if (!contentEl || !passwordEl) return;
-  
-      const content = contentEl.value.trim();
-      const password = passwordEl.value.trim();
-  
-      // 1. 에러 초기화 및 가시화
-      errorMsg.style.display = "none";
-      errorMsg.textContent = "";
-  
-      if (!content) {
-        errorMsg.textContent = "내용을 입력해주세요.";
+async handleCommentSubmit() {
+    const contentEl = document.getElementById('comment-input');
+    const passwordEl = document.getElementById('pw-input');
+    const errorMsg = document.getElementById('error-message');
+    const btn = document.getElementById('submit-btn');
+
+    const content = contentEl.value.trim();
+    const password = passwordEl.value.trim();
+
+    if (!content || password.length < 4) {
+        errorMsg.textContent = "내용과 비밀번호(4자 이상)를 확인해주세요.";
         errorMsg.style.display = "block";
-        contentEl.focus();
         return;
-      }
-      
-      if (password.length < 4) {
-        errorMsg.textContent = "비밀번호를 4자 이상 입력해주세요.";
-        errorMsg.style.display = "block";
-        passwordEl.focus();
-        return;
-      }
-  
-      btn.disabled = true;
-      btn.innerText = "중..."; // 버튼 높이 유지를 위해 텍스트 최소화
-      
-      try {
-        // 2. postComment가 모듈 내에 없다면 fetch 로직 직접 수행 또는 추가 필요
+    }
+
+    btn.disabled = true;
+    btn.innerText = "등록 중...";
+
+    try {
         const res = await fetch(CommentsModule.config.apiUrl, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'insert', content, password })
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'create', // insert -> create로 변경 (백엔드 일치)
+                content: content, 
+                password: password 
+            })
         });
-        const result = await res.json();
-  
-        if (result.status === 200) {
-          contentEl.value = '';
-          passwordEl.value = '';
-          // 3. alert 제거: 성공 시 에러 메시지 칸에 "등록되었습니다" 잠시 표시하거나 그냥 렌더링
-          errorMsg.style.color = "blue"; // 성공은 파란색으로 잠깐 표시 가능
-          errorMsg.textContent = "성공적으로 등록되었습니다.";
-          errorMsg.style.display = "block";
-          
-          setTimeout(() => {
-              errorMsg.style.display = "none";
-              errorMsg.style.color = "red"; // 다시 에러 색상으로 복구
-          }, 2000);
-  
-          await CommentsModule.render(1); 
-        } else {
-          errorMsg.textContent = "등록 실패: " + (result.message || "서버 오류");
-          errorMsg.style.display = "block";
-        }
-      } catch (e) {
-        console.error(e);
-        errorMsg.textContent = "네트워크 연결을 확인해주세요.";
+
+        // 성공 처리
+        contentEl.value = '';
+        passwordEl.value = '';
+        errorMsg.style.color = "blue";
+        errorMsg.textContent = "기도가 등록되었습니다.";
         errorMsg.style.display = "block";
-      } finally {
+        
+        setTimeout(() => {
+            errorMsg.style.display = "none";
+            errorMsg.style.color = "#e74c3c";
+            CommentsModule.render(1); 
+        }, 1000);
+
+    } catch (e) {
+        errorMsg.textContent = "네트워크 오류가 발생했습니다.";
+        errorMsg.style.display = "block";
+    } finally {
         btn.disabled = false;
         btn.innerText = "등록";
-      }
     }
-  };
+}
   
   window.submitComment = () => app.handleCommentSubmit();
   document.addEventListener('DOMContentLoaded', () => app.init());
