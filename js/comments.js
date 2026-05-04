@@ -1,6 +1,7 @@
 export const CommentsModule = {
   config: {
-    apiUrl: 'https://script.google.com/macros/s/AKfycbyVKORhy8YN5vaWf6xIrikRjYwhodtfEQDdkpXvPALD-GIfXlW-kqOr81H_gvRfvXhg6g/exec', 
+    // 1. 배포된 웹 앱 URL을 여기에 넣으세요.
+    apiUrl: 'https://script.google.com/macros/s/AKfycbwHeAcOZjRIECbK1txd9inRnnFkEVbW39Rfrpg4qyTMxxdB7gKmroAEABUgzc_8wdXupQ/exec', 
     pageSize: 10,
     pageGroupSize: 5
   },
@@ -42,6 +43,8 @@ export const CommentsModule = {
     }
 
     this.listContainer.innerHTML = comments.map(c => {
+      // 서버에서 온 id(ISOString)를 안전하게 처리하기 위해 따옴표로 감쌈
+      const safeId = String(c.id);
       const date = new Date(c.id);
       const formattedDate = isNaN(date) ? "방금 전" : date.toLocaleString('ko-KR', {
         year: 'numeric', month: '2-digit', day: '2-digit',
@@ -49,22 +52,23 @@ export const CommentsModule = {
       });
 
       return `
-        <div class="comment-item" id="item-${c.id}">
+        <div class="comment-item">
           <div class="comment-content">${c.content}</div>
           <div class="comment-footer">
             <span class="comment-date">${formattedDate}</span>
             <div class="btn-group">
-              <button class="edit-btn" onclick="CommentsModule.openActionField('${c.id}', 'update')">수정</button>
-              <button class="del-btn" onclick="CommentsModule.openActionField('${c.id}', 'delete')">삭제</button>
+              <button class="edit-btn" onclick="CommentsModule.openActionField('${safeId}', 'update')">수정</button>
+              <button class="del-btn" onclick="CommentsModule.openActionField('${safeId}', 'delete')">삭제</button>
             </div>
           </div>
-          <div id="action-area-${c.id}" class="edit-field-container" style="display:none; margin-top:10px;">
-            <textarea id="edit-input-${c.id}" class="edit-textarea">${c.content}</textarea>
+          <!-- 수정/삭제 입력 영역 (ID에 특수문자가 있을 수 있어 CSS escape 처리를 위해 기호 제거) -->
+          <div id="action-area-${safeId.replace(/[:.]/g, '-')}" class="edit-field-container" style="display:none; margin-top:10px;">
+            <textarea id="edit-input-${safeId.replace(/[:.]/g, '-')}" class="edit-textarea">${c.content}</textarea>
             <div class="edit-form-bottom">
-              <input type="password" id="action-pw-${c.id}" placeholder="비밀번호" class="edit-pw-input">
+              <input type="password" id="action-pw-${safeId.replace(/[:.]/g, '-')}" placeholder="비밀번호" class="edit-pw-input">
               <div class="edit-btns">
-                <button id="action-submit-${c.id}" class="submit-edit-btn">확인</button>
-                <button onclick="CommentsModule.closeActionField('${c.id}')" class="cancel-edit-btn">취소</button>
+                <button id="action-submit-${safeId.replace(/[:.]/g, '-')}" class="submit-edit-btn">확정</button>
+                <button onclick="CommentsModule.closeActionField('${safeId}')" class="cancel-edit-btn">취소</button>
               </div>
             </div>
           </div>
@@ -94,10 +98,12 @@ export const CommentsModule = {
   },
 
   openActionField(id, action) {
+    const safeId = id.replace(/[:.]/g, '-');
     document.querySelectorAll('.edit-field-container').forEach(el => el.style.display = 'none');
-    const area = document.getElementById(`action-area-${id}`);
-    const input = document.getElementById(`edit-input-${id}`);
-    const submitBtn = document.getElementById(`action-submit-${id}`);
+    
+    const area = document.getElementById(`action-area-${safeId}`);
+    const input = document.getElementById(`edit-input-${safeId}`);
+    const submitBtn = document.getElementById(`action-submit-${safeId}`);
     
     if (!area) return;
     area.style.display = 'block';
@@ -109,17 +115,21 @@ export const CommentsModule = {
       if (input) input.style.display = 'block';
       submitBtn.innerText = '수정 완료';
     }
+    
+    // 클릭 이벤트 바인딩 (id 원본값을 보냄)
     submitBtn.onclick = () => this.submitAction(id, action);
   },
 
   closeActionField(id) {
-    const area = document.getElementById(`action-area-${id}`);
+    const safeId = id.replace(/[:.]/g, '-');
+    const area = document.getElementById(`action-area-${safeId}`);
     if (area) area.style.display = 'none';
   },
 
   async submitAction(id, action) {
-    const password = document.getElementById(`action-pw-${id}`).value.trim();
-    const content = action === 'update' ? document.getElementById(`edit-input-${id}`).value.trim() : "";
+    const safeId = id.replace(/[:.]/g, '-');
+    const password = document.getElementById(`action-pw-${safeId}`).value.trim();
+    const content = action === 'update' ? document.getElementById(`edit-input-${safeId}`).value.trim() : "";
     
     if (action === 'update' && !content) return alert("내용을 입력하세요.");
     if (!password) return alert("비밀번호를 입력하세요.");
@@ -127,8 +137,10 @@ export const CommentsModule = {
     try {
       const res = await fetch(this.config.apiUrl, {
         method: 'POST',
+        // GAS와의 호환성을 위해 headers 생략하거나 text/plain 사용
         body: JSON.stringify({ action, id, content, password })
       });
+      
       const result = await res.json();
 
       if (result.status === 200) {
@@ -136,10 +148,11 @@ export const CommentsModule = {
         this.cache = {}; 
         this.render(1);
       } else {
-        alert(result.message || "비밀번호가 틀렸습니다.");
+        alert(result.message || "비밀번호가 틀렸거나 처리에 실패했습니다.");
       }
     } catch (e) {
-      alert("작업 실패: 서버 연결을 확인하세요.");
+      console.error("작업 에러:", e);
+      alert("서버 통신 중 오류가 발생했습니다.");
     }
   },
 
