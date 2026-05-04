@@ -4,14 +4,19 @@ export const ModalModule = {
     this.modalImg = document.getElementById('modal-img');
     this.zoomElement = document.querySelector('.zoom-container');
     this.closeBtn = document.querySelector('.close-btn');
+    this.imageList = [];
+    this.currentIndex = 0;
     
-    // 핀치줌 상태
+    document.querySelector('.prev-btn').onclick = (e) => {
+      e.stopPropagation();
+      this.navigate(-1);
+    };
+    document.querySelector('.next-btn').onclick = (e) => {
+      e.stopPropagation();
+      this.navigate(1);
+    };
+
     this.scale = 1;
-    this.lastScale = 1;
-    this.originX = 0;
-    this.originY = 0;
-    this.lastX = 0;
-    this.lastY = 0;
 
     if (this.closeBtn) {
       this.closeBtn.onclick = (e) => {
@@ -24,8 +29,18 @@ export const ModalModule = {
         if (e.target === this.modal) this.close();
       };
     }
-
     this._initTouch();
+  },
+
+  setImageList(list) {
+    this.imageList = list;
+  },
+
+  navigate(dir) {
+    this.currentIndex = (this.currentIndex + dir + this.imageList.length) % this.imageList.length;
+    this.modalImg.src = this.imageList[this.currentIndex];
+    this.modalImg.style.transform = '';
+    this.scale = 1;
   },
 
   _initTouch() {
@@ -63,22 +78,29 @@ export const ModalModule = {
         e.preventDefault();
         lastTX = e.touches[0].clientX - startX;
         lastTY = e.touches[0].clientY - startY;
-      
-        // 이동 범위 제한
-        const imgW = img.naturalWidth || img.offsetWidth;
-        const imgH = img.naturalHeight || img.offsetHeight;
+
         const maxX = (img.offsetWidth * (this.scale - 1)) / 2;
         const maxY = (img.offsetHeight * (this.scale - 1)) / 2;
         lastTX = Math.min(maxX, Math.max(-maxX, lastTX));
         lastTY = Math.min(maxY, Math.max(-maxY, lastTY));
-      
+
         img.style.transform = `translate(${lastTX}px, ${lastTY}px) scale(${this.scale})`;
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', () => {
+      if (this.scale <= 1) {
+        this.scale = 1;
+        lastTX = 0;
+        lastTY = 0;
+        img.style.transform = '';
       }
     });
   },
 
   open(src) {
     if (!this.modal || !this.modalImg) return;
+    this.currentIndex = this.imageList.indexOf(src);
     this.modal.style.display = 'flex';
     this.modalImg.src = src;
     this.modalImg.style.transform = '';
