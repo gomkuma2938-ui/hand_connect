@@ -36,12 +36,15 @@ export const CommentsModule = {
   },
 
   displayComments(comments) {
+    // 1. 상단 제목 추가 (디자인에 맞춰 스타일 조절 가능)
+    const titleHtml = `<h3 class="comments-title">기도 동참하기🙏</h3>`;
+
     if (!comments || comments.length === 0) {
-      this.listContainer.innerHTML = '<p style="text-align:center; padding:20px;">등록된 댓글이 없습니다.</p>';
+      this.listContainer.innerHTML = titleHtml + '<p style="text-align:center; padding:20px;">등록된 댓글이 없습니다.</p>';
       return;
     }
 
-    this.listContainer.innerHTML = comments.map(c => {
+    const listHtml = comments.map(c => {
       const originalId = String(c.id);
       const safeHtmlId = originalId.replace(/[^a-zA-Z0-9]/g, ""); 
       const date = new Date(originalId);
@@ -70,6 +73,8 @@ export const CommentsModule = {
         </div>
       `;
     }).join('');
+
+    this.listContainer.innerHTML = titleHtml + listHtml;
 
     // 이벤트 리스너 바인딩
     this.listContainer.querySelectorAll('.edit-btn, .del-btn').forEach(btn => {
@@ -118,10 +123,10 @@ export const CommentsModule = {
     
     if (action === 'delete') {
       if (input) input.style.display = 'none';
-      submitBtn.innerText = '삭제'; // '삭제 확정'에서 '삭제'로 변경
+      submitBtn.innerText = '삭제';
     } else {
       if (input) input.style.display = 'block';
-      submitBtn.innerText = '수정'; // '수정 완료'에서 '수정'으로 변경
+      submitBtn.innerText = '수정';
     }
     
     submitBtn.onclick = () => this.submitAction(id, action);
