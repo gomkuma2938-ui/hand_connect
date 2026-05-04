@@ -226,3 +226,27 @@ header {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* 3. 삭제/확인 버튼 호버 시 색상 변화 제거 */
+.del-btn:hover, .submit-edit-btn:hover {
+    background-color: var(--navy-color) !important;
+    opacity: 0.9;
+}
+
+/* 5. 버튼 크기 통일 (25px 고정) */
+.submit-edit-btn, .cancel-btn, #submit-btn {
+    height: 25px !important;
+    padding: 0 12px !important;
+    font-size: 0.75rem !important;
+    line-height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 6. 에러 문구 스타일 (빨간색 11px) */
+.error-msg, #error-message {
+    color: #e74c3c !important;
+    font-size: 11px !important;
+    margin-top: 6px;
+}
